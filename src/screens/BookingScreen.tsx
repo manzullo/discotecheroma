@@ -40,7 +40,6 @@ export const BookingScreen: React.FC<BookingScreenProps> = ({
   navigation,
 }) => {
   const { evento } = route.params;
-  const acf = evento.acf || {};
 
   const [formData, setFormData] = useState<FormData>({
     nome: '',
@@ -52,10 +51,6 @@ export const BookingScreen: React.FC<BookingScreenProps> = ({
   });
   const [errors, setErrors] = useState<FormErrors>({});
   const [loading, setLoading] = useState(false);
-
-  const stripHtml = (html: string) => {
-    return html.replace(/<[^>]*>/g, '').trim();
-  };
 
   const validateForm = (): boolean => {
     const newErrors: FormErrors = {};
@@ -96,7 +91,7 @@ export const BookingScreen: React.FC<BookingScreenProps> = ({
     try {
       const prenotazione = await savePrenotazione({
         eventoId: evento.id,
-        nomeEvento: stripHtml(evento.title.rendered),
+        nomeEvento: evento.titolo,
         nome: formData.nome,
         cognome: formData.cognome,
         email: formData.email,
@@ -124,6 +119,9 @@ export const BookingScreen: React.FC<BookingScreenProps> = ({
     }
   };
 
+  // Estrai il nome del locale dal titolo (es. "Volo - Venerdì" -> "Volo")
+  const nomeLocale = evento.titolo.split(' - ')[0];
+
   return (
     <SafeAreaView style={styles.container} edges={['bottom']}>
       <StatusBar barStyle="light-content" backgroundColor={colors.background} />
@@ -139,24 +137,26 @@ export const BookingScreen: React.FC<BookingScreenProps> = ({
         >
           {/* Event Summary */}
           <View style={styles.eventSummary}>
-            <Text style={styles.eventTitle}>{stripHtml(evento.title.rendered)}</Text>
+            <Text style={styles.eventTitle}>{evento.titolo}</Text>
             <View style={styles.eventDetails}>
-              {acf.data_evento && (
-                <View style={styles.eventDetail}>
-                  <Text style={styles.eventDetailIcon}>📅</Text>
-                  <Text style={styles.eventDetailText}>{acf.data_evento}</Text>
-                </View>
-              )}
-              {acf.location && (
-                <View style={styles.eventDetail}>
-                  <Text style={styles.eventDetailIcon}>📍</Text>
-                  <Text style={styles.eventDetailText}>{acf.location}</Text>
-                </View>
-              )}
-              {acf.prezzo_prevendita && (
+              <View style={styles.eventDetail}>
+                <Text style={styles.eventDetailIcon}>📅</Text>
+                <Text style={styles.eventDetailText}>{evento.giorno}</Text>
+              </View>
+              <View style={styles.eventDetail}>
+                <Text style={styles.eventDetailIcon}>📍</Text>
+                <Text style={styles.eventDetailText}>{nomeLocale}</Text>
+              </View>
+              {evento.prezzoMinimo && (
                 <View style={styles.eventDetail}>
                   <Text style={styles.eventDetailIcon}>💰</Text>
-                  <Text style={styles.eventDetailText}>{acf.prezzo_prevendita} / persona</Text>
+                  <Text style={styles.eventDetailText}>da {evento.prezzoMinimo}€</Text>
+                </View>
+              )}
+              {evento.etaMinima && (
+                <View style={styles.eventDetail}>
+                  <Text style={styles.eventDetailIcon}>🔞</Text>
+                  <Text style={styles.eventDetailText}>{evento.etaMinima}+</Text>
                 </View>
               )}
             </View>
@@ -223,27 +223,13 @@ export const BookingScreen: React.FC<BookingScreenProps> = ({
             />
           </View>
 
-          {/* Price Summary */}
-          <View style={styles.priceSummary}>
-            <View style={styles.priceRow}>
-              <Text style={styles.priceLabel}>
-                {formData.numeroPosti || '0'} x {acf.prezzo_prevendita || 'Gratis'}
-              </Text>
-              <Text style={styles.priceValue}>
-                {acf.prezzo_prevendita
-                  ? `${parseInt(acf.prezzo_prevendita) * parseInt(formData.numeroPosti || '0')}€`
-                  : 'Gratis'}
-              </Text>
-            </View>
-            <View style={styles.divider} />
-            <View style={styles.priceRow}>
-              <Text style={styles.totalLabel}>Totale</Text>
-              <Text style={styles.totalValue}>
-                {acf.prezzo_prevendita
-                  ? `${parseInt(acf.prezzo_prevendita) * parseInt(formData.numeroPosti || '0')}€`
-                  : 'Gratis'}
-              </Text>
-            </View>
+          {/* Info */}
+          <View style={styles.infoBox}>
+            <Text style={styles.infoTitle}>Come funziona?</Text>
+            <Text style={styles.infoText}>
+              Inserisci i tuoi dati per entrare in lista. Riceverai una conferma via email.
+              Il pagamento avverrà direttamente in cassa la sera dell'evento.
+            </Text>
           </View>
 
           {/* Submit Button */}
@@ -257,7 +243,6 @@ export const BookingScreen: React.FC<BookingScreenProps> = ({
 
           <Text style={styles.disclaimer}>
             Confermando la prenotazione accetti i termini e condizioni del servizio.
-            Il pagamento avverrà direttamente in cassa la sera dell'evento.
           </Text>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -321,40 +306,22 @@ const styles = StyleSheet.create({
     minHeight: 80,
     textAlignVertical: 'top',
   },
-  priceSummary: {
+  infoBox: {
     backgroundColor: colors.backgroundCard,
     borderRadius: borderRadius.lg,
     padding: spacing.md,
     marginBottom: spacing.lg,
   },
-  priceRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: spacing.xs,
-  },
-  priceLabel: {
-    color: colors.textSecondary,
-    fontSize: fontSize.md,
-  },
-  priceValue: {
+  infoTitle: {
     color: colors.text,
     fontSize: fontSize.md,
-  },
-  divider: {
-    height: 1,
-    backgroundColor: colors.border,
-    marginVertical: spacing.sm,
-  },
-  totalLabel: {
-    color: colors.text,
-    fontSize: fontSize.lg,
     fontWeight: fontWeight.semibold,
+    marginBottom: spacing.xs,
   },
-  totalValue: {
-    color: colors.primary,
-    fontSize: fontSize.xl,
-    fontWeight: fontWeight.bold,
+  infoText: {
+    color: colors.textSecondary,
+    fontSize: fontSize.sm,
+    lineHeight: 20,
   },
   submitButton: {
     marginBottom: spacing.md,

@@ -22,22 +22,14 @@ type EventDetailScreenProps = NativeStackScreenProps<
 
 const { width, height } = Dimensions.get('window');
 
+// Immagine placeholder
+const PLACEHOLDER_IMAGE = 'https://images.unsplash.com/photo-1571266028243-e4733b0f0bb0?w=800';
+
 export const EventDetailScreen: React.FC<EventDetailScreenProps> = ({
   route,
   navigation,
 }) => {
   const { evento } = route.params;
-  const acf = evento.acf || {};
-
-  const stripHtml = (html: string) => {
-    return html
-      .replace(/<[^>]*>/g, '')
-      .replace(/&nbsp;/g, ' ')
-      .replace(/&amp;/g, '&')
-      .replace(/&lt;/g, '<')
-      .replace(/&gt;/g, '>')
-      .trim();
-  };
 
   const handleBooking = () => {
     navigation.navigate('Booking', { evento });
@@ -50,7 +42,7 @@ export const EventDetailScreen: React.FC<EventDetailScreenProps> = ({
   }: {
     icon: string;
     label: string;
-    value?: string;
+    value?: string | null;
   }) => {
     if (!value) return null;
     return (
@@ -64,6 +56,8 @@ export const EventDetailScreen: React.FC<EventDetailScreenProps> = ({
     );
   };
 
+  const imageUrl = evento.immagine || PLACEHOLDER_IMAGE;
+
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" translucent backgroundColor="transparent" />
@@ -75,7 +69,7 @@ export const EventDetailScreen: React.FC<EventDetailScreenProps> = ({
       >
         {/* Hero Image */}
         <ImageBackground
-          source={{ uri: evento.featured_image_url }}
+          source={{ uri: imageUrl }}
           style={styles.heroImage}
         >
           <LinearGradient
@@ -84,10 +78,10 @@ export const EventDetailScreen: React.FC<EventDetailScreenProps> = ({
           >
             <SafeAreaView edges={['top']}>
               <View style={styles.heroContent}>
-                {acf.prezzo_prevendita && (
+                {evento.prezzoMinimo && (
                   <View style={styles.priceTag}>
-                    <Text style={styles.priceLabel}>Prevendita</Text>
-                    <Text style={styles.priceValue}>{acf.prezzo_prevendita}</Text>
+                    <Text style={styles.priceLabel}>A partire da</Text>
+                    <Text style={styles.priceValue}>{evento.prezzoMinimo}€</Text>
                   </View>
                 )}
               </View>
@@ -98,22 +92,20 @@ export const EventDetailScreen: React.FC<EventDetailScreenProps> = ({
         {/* Content */}
         <View style={styles.content}>
           {/* Title */}
-          <Text style={styles.title}>{stripHtml(evento.title.rendered)}</Text>
+          <Text style={styles.title}>{evento.titolo}</Text>
 
-          {/* Location */}
-          {acf.location && (
-            <View style={styles.locationRow}>
-              <Text style={styles.locationIcon}>📍</Text>
-              <Text style={styles.location}>{acf.location}</Text>
-            </View>
-          )}
+          {/* Day */}
+          <View style={styles.dayRow}>
+            <Text style={styles.dayIcon}>📅</Text>
+            <Text style={styles.dayText}>{evento.giorno}</Text>
+          </View>
 
           {/* Tags */}
-          {acf.genere_musicale && (
+          {evento.generiMusicali.length > 0 && (
             <View style={styles.tagsContainer}>
-              {acf.genere_musicale.split(',').map((tag, index) => (
+              {evento.generiMusicali.map((tag, index) => (
                 <View key={index} style={styles.tag}>
-                  <Text style={styles.tagText}>{tag.trim()}</Text>
+                  <Text style={styles.tagText}>{tag}</Text>
                 </View>
               ))}
             </View>
@@ -122,45 +114,41 @@ export const EventDetailScreen: React.FC<EventDetailScreenProps> = ({
           {/* Info Cards */}
           <View style={styles.infoCard}>
             <Text style={styles.sectionTitle}>Dettagli Evento</Text>
-            <InfoRow icon="📅" label="Data" value={acf.data_evento} />
-            <InfoRow
-              icon="🕐"
-              label="Orario"
-              value={
-                acf.ora_inizio && acf.ora_fine
-                  ? `${acf.ora_inizio} - ${acf.ora_fine}`
-                  : acf.ora_inizio
-              }
-            />
-            <InfoRow icon="💰" label="Ingresso" value={acf.prezzo} />
-            <InfoRow icon="🎫" label="Prevendita" value={acf.prezzo_prevendita} />
-            <InfoRow icon="👔" label="Dress Code" value={acf.dress_code} />
-            <InfoRow icon="🔞" label="Età Minima" value={acf.eta_minima ? `${acf.eta_minima}+` : undefined} />
+            <InfoRow icon="📅" label="Giorno" value={evento.giorno} />
+            <InfoRow icon="🔞" label="Età Minima" value={evento.etaMinima ? `${evento.etaMinima}+` : null} />
           </View>
 
-          {/* Location Card */}
-          {acf.indirizzo && (
+          {/* Costi Liste */}
+          {evento.costiListe && (
             <View style={styles.infoCard}>
-              <Text style={styles.sectionTitle}>Dove</Text>
-              <InfoRow icon="📍" label="Indirizzo" value={acf.indirizzo} />
+              <Text style={styles.sectionTitle}>📋 Liste</Text>
+              <Text style={styles.costiText}>{evento.costiListe}</Text>
             </View>
           )}
 
-          {/* Artists */}
-          {acf.artisti && (
+          {/* Costi Tavoli */}
+          {evento.costiTavoli && (
             <View style={styles.infoCard}>
-              <Text style={styles.sectionTitle}>🎧 Line-up</Text>
-              <Text style={styles.artists}>{acf.artisti}</Text>
+              <Text style={styles.sectionTitle}>🪑 Tavoli</Text>
+              <Text style={styles.costiText}>{evento.costiTavoli}</Text>
             </View>
           )}
 
-          {/* Description */}
-          <View style={styles.infoCard}>
-            <Text style={styles.sectionTitle}>Info</Text>
-            <Text style={styles.description}>
-              {stripHtml(evento.content.rendered)}
-            </Text>
-          </View>
+          {/* Costi Pacchetti */}
+          {evento.costiPacchetti && (
+            <View style={styles.infoCard}>
+              <Text style={styles.sectionTitle}>🎁 Pacchetti</Text>
+              <Text style={styles.costiText}>{evento.costiPacchetti}</Text>
+            </View>
+          )}
+
+          {/* Note */}
+          {evento.note && (
+            <View style={styles.infoCard}>
+              <Text style={styles.sectionTitle}>📝 Note</Text>
+              <Text style={styles.costiText}>{evento.note}</Text>
+            </View>
+          )}
 
           {/* Spacing for button */}
           <View style={{ height: 100 }} />
@@ -175,8 +163,10 @@ export const EventDetailScreen: React.FC<EventDetailScreenProps> = ({
         >
           <View style={styles.bookingContainer}>
             <View style={styles.bookingInfo}>
-              <Text style={styles.bookingPrice}>{acf.prezzo_prevendita || acf.prezzo || 'Gratis'}</Text>
-              <Text style={styles.bookingLabel}>Prevendita</Text>
+              <Text style={styles.bookingPrice}>
+                {evento.prezzoMinimo ? `da ${evento.prezzoMinimo}€` : 'Info'}
+              </Text>
+              <Text style={styles.bookingLabel}>Prenota in lista</Text>
             </View>
             <Button
               title="Prenota Ora"
@@ -241,18 +231,19 @@ const styles = StyleSheet.create({
     fontWeight: fontWeight.bold,
     lineHeight: 40,
   },
-  locationRow: {
+  dayRow: {
     flexDirection: 'row',
     alignItems: 'center',
     marginTop: spacing.sm,
     gap: spacing.xs,
   },
-  locationIcon: {
+  dayIcon: {
     fontSize: fontSize.md,
   },
-  location: {
+  dayText: {
     color: colors.textSecondary,
     fontSize: fontSize.md,
+    fontWeight: fontWeight.semibold,
   },
   tagsContainer: {
     flexDirection: 'row',
@@ -307,13 +298,8 @@ const styles = StyleSheet.create({
     fontSize: fontSize.md,
     fontWeight: fontWeight.medium,
   },
-  artists: {
+  costiText: {
     color: colors.text,
-    fontSize: fontSize.md,
-    lineHeight: 24,
-  },
-  description: {
-    color: colors.textSecondary,
     fontSize: fontSize.md,
     lineHeight: 24,
   },

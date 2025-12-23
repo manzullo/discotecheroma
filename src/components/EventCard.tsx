@@ -19,6 +19,9 @@ interface EventCardProps {
 
 const { width } = Dimensions.get('window');
 
+// Immagine placeholder quando non c'è immagine
+const PLACEHOLDER_IMAGE = 'https://images.unsplash.com/photo-1571266028243-e4733b0f0bb0?w=800';
+
 export const EventCard: React.FC<EventCardProps> = ({
   evento,
   onPress,
@@ -27,19 +30,7 @@ export const EventCard: React.FC<EventCardProps> = ({
   const isLarge = variant === 'large';
   const cardHeight = isLarge ? 220 : 150;
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    const options: Intl.DateTimeFormatOptions = {
-      weekday: 'short',
-      day: 'numeric',
-      month: 'short',
-    };
-    return date.toLocaleDateString('it-IT', options);
-  };
-
-  const stripHtml = (html: string) => {
-    return html.replace(/<[^>]*>/g, '').trim();
-  };
+  const imageUrl = evento.immagine || PLACEHOLDER_IMAGE;
 
   return (
     <TouchableOpacity
@@ -48,7 +39,7 @@ export const EventCard: React.FC<EventCardProps> = ({
       activeOpacity={0.9}
     >
       <ImageBackground
-        source={{ uri: evento.featured_image_url }}
+        source={{ uri: imageUrl }}
         style={styles.imageBackground}
         imageStyle={styles.image}
       >
@@ -58,13 +49,13 @@ export const EventCard: React.FC<EventCardProps> = ({
         >
           <View style={styles.content}>
             <View style={styles.header}>
-              <View style={styles.dateBox}>
-                <Text style={styles.dateText}>{formatDate(evento.date)}</Text>
+              <View style={styles.dayBox}>
+                <Text style={styles.dayText}>{evento.giorno}</Text>
               </View>
-              {evento.acf?.prezzo_prevendita && (
+              {evento.prezzoMinimo && (
                 <View style={styles.priceBox}>
                   <Text style={styles.priceText}>
-                    {evento.acf.prezzo_prevendita}
+                    da {evento.prezzoMinimo}€
                   </Text>
                 </View>
               )}
@@ -72,21 +63,21 @@ export const EventCard: React.FC<EventCardProps> = ({
 
             <View style={styles.info}>
               <Text style={styles.title} numberOfLines={2}>
-                {stripHtml(evento.title.rendered)}
+                {evento.titolo}
               </Text>
 
-              {evento.acf?.location && (
-                <View style={styles.locationRow}>
-                  <Text style={styles.locationIcon}>📍</Text>
-                  <Text style={styles.location}>{evento.acf.location}</Text>
+              {evento.etaMinima && (
+                <View style={styles.ageRow}>
+                  <Text style={styles.ageIcon}>🔞</Text>
+                  <Text style={styles.ageText}>{evento.etaMinima}+</Text>
                 </View>
               )}
 
-              {isLarge && evento.acf?.genere_musicale && (
+              {isLarge && evento.generiMusicali.length > 0 && (
                 <View style={styles.tagsRow}>
-                  {evento.acf.genere_musicale.split(',').slice(0, 3).map((tag, index) => (
+                  {evento.generiMusicali.slice(0, 3).map((tag, index) => (
                     <View key={index} style={styles.tag}>
-                      <Text style={styles.tagText}>{tag.trim()}</Text>
+                      <Text style={styles.tagText}>{tag}</Text>
                     </View>
                   ))}
                 </View>
@@ -127,13 +118,13 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'flex-start',
   },
-  dateBox: {
+  dayBox: {
     backgroundColor: colors.primary,
     paddingHorizontal: spacing.sm,
     paddingVertical: spacing.xs,
     borderRadius: borderRadius.sm,
   },
-  dateText: {
+  dayText: {
     color: colors.text,
     fontSize: fontSize.sm,
     fontWeight: fontWeight.semibold,
@@ -159,15 +150,15 @@ const styles = StyleSheet.create({
     fontWeight: fontWeight.bold,
     lineHeight: 28,
   },
-  locationRow: {
+  ageRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.xs,
   },
-  locationIcon: {
+  ageIcon: {
     fontSize: fontSize.sm,
   },
-  location: {
+  ageText: {
     color: colors.textSecondary,
     fontSize: fontSize.sm,
   },

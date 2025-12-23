@@ -19,6 +19,17 @@ type HomeScreenProps = {
   navigation: NativeStackNavigationProp<RootStackParamList>;
 };
 
+// Ordine dei giorni della settimana
+const GIORNI_ORDER: Record<string, number> = {
+  'Lunedì': 1,
+  'Martedì': 2,
+  'Mercoledì': 3,
+  'Giovedì': 4,
+  'Venerdì': 5,
+  'Sabato': 6,
+  'Domenica': 7,
+};
+
 export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const [eventi, setEventi] = useState<Evento[]>([]);
   const [loading, setLoading] = useState(true);
@@ -49,12 +60,26 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
     navigation.navigate('EventDetail', { evento });
   };
 
-  // Ordina gli eventi per data e prendi i prossimi
-  const sortedEventi = [...eventi].sort(
-    (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+  // Ottieni il giorno corrente della settimana
+  const oggi = new Date();
+  const giornoCorrente = oggi.toLocaleDateString('it-IT', { weekday: 'long' });
+  const giornoCapitalized = giornoCorrente.charAt(0).toUpperCase() + giornoCorrente.slice(1);
+
+  // Filtra eventi per oggi
+  const eventiOggi = eventi.filter(e => e.giorno === giornoCapitalized);
+
+  // Eventi del weekend (venerdì, sabato, domenica)
+  const eventiWeekend = eventi.filter(e =>
+    ['Venerdì', 'Sabato', 'Domenica'].includes(e.giorno)
   );
-  const featuredEvent = sortedEventi[0];
-  const upcomingEvents = sortedEventi.slice(1, 5);
+
+  // Prendi alcuni eventi in evidenza (quelli con immagine)
+  const eventiInEvidenza = eventi
+    .filter(e => e.immagine)
+    .slice(0, 5);
+
+  // Conta locali unici
+  const localiUnici = new Set(eventi.map(e => e.titolo.split(' - ')[0])).size;
 
   if (loading) {
     return <LoadingSpinner message="Caricamento eventi..." />;
@@ -91,23 +116,41 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
           <Text style={styles.subtitle}>Le migliori serate della capitale</Text>
         </View>
 
-        {/* Featured Event */}
-        {featuredEvent && (
+        {/* Eventi di oggi */}
+        {eventiOggi.length > 0 && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>🔥 In Evidenza</Text>
-            <EventCard
-              evento={featuredEvent}
-              onPress={() => handleEventPress(featuredEvent)}
-              variant="large"
-            />
+            <Text style={styles.sectionTitle}>🔥 Stasera - {giornoCapitalized}</Text>
+            {eventiOggi.slice(0, 3).map((evento) => (
+              <EventCard
+                key={evento.id}
+                evento={evento}
+                onPress={() => handleEventPress(evento)}
+                variant="large"
+              />
+            ))}
           </View>
         )}
 
-        {/* Upcoming Events */}
-        {upcomingEvents.length > 0 && (
+        {/* In Evidenza */}
+        {eventiInEvidenza.length > 0 && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>📅 Prossimi Eventi</Text>
-            {upcomingEvents.map((evento) => (
+            <Text style={styles.sectionTitle}>✨ In Evidenza</Text>
+            {eventiInEvidenza.slice(0, 3).map((evento) => (
+              <EventCard
+                key={evento.id}
+                evento={evento}
+                onPress={() => handleEventPress(evento)}
+                variant="compact"
+              />
+            ))}
+          </View>
+        )}
+
+        {/* Weekend */}
+        {eventiWeekend.length > 0 && !eventiOggi.length && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>🎉 Questo Weekend</Text>
+            {eventiWeekend.slice(0, 4).map((evento) => (
               <EventCard
                 key={evento.id}
                 evento={evento}
@@ -125,7 +168,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
             <Text style={styles.statLabel}>Eventi</Text>
           </View>
           <View style={styles.statBox}>
-            <Text style={styles.statNumber}>15+</Text>
+            <Text style={styles.statNumber}>{localiUnici}+</Text>
             <Text style={styles.statLabel}>Locali</Text>
           </View>
           <View style={styles.statBox}>
