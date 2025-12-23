@@ -1,0 +1,77 @@
+// Tema dark per app discoteca
+
+export const colors = {
+  // Colori principali
+  primary: '#E91E63', // Rosa/Magenta - tipico discoteca
+  primaryDark: '#AD1457',
+  primaryLight: '#F48FB1',
+
+  // Accent
+  accent: '#7C4DFF', // Viola
+  accentLight: '#B388FF',
+
+  // Background
+  background: '#0D0D0D',
+  backgroundLight: '#1A1A2E',
+  backgroundCard: '#16213E',
+
+  // Testo
+  text: '#FFFFFF',
+  textSecondary: '#B0B0B0',
+  textMuted: '#666666',
+
+  // Gradient
+  gradientStart: '#E91E63',
+  gradientEnd: '#7C4DFF',
+
+  // Status
+  success: '#4CAF50',
+  warning: '#FF9800',
+  error: '#F44336',
+
+  // Altro
+  border: '#333333',
+  overlay: 'rgba(0, 0, 0, 0.7)',
+};
+
+export const spacing = {
+  xs: 4,
+  sm: 8,
+  md: 16,
+  lg: 24,
+  xl: 32,
+  xxl: 48,
+};
+
+export const borderRadius = {
+  sm: 8,
+  md: 12,
+  lg: 16,
+  xl: 24,
+  full: 9999,
+};
+
+export const fontSize = {
+  xs: 12,
+  sm: 14,
+  md: 16,
+  lg: 18,
+  xl: 22,
+  xxl: 28,
+  title: 32,
+};
+
+export const fontWeight = {
+  regular: '400' as const,
+  medium: '500' as const,
+  semibold: '600' as const,
+  bold: '700' as const,
+};
+
+export default {
+  colors,
+  spacing,
+  borderRadius,
+  fontSize,
+  fontWeight,
+};
