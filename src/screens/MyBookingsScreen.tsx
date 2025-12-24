@@ -13,7 +13,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { Button, LoadingSpinner } from '../components';
 import { getPrenotazioni, cancelPrenotazione } from '../services/api';
 import { Prenotazione } from '../types';
-import { colors, spacing, borderRadius, fontSize, fontWeight } from '../theme';
+import { colors, spacing, borderRadius, fontSize, fontWeight, elevation } from '../theme';
 
 export const MyBookingsScreen: React.FC = () => {
   const [prenotazioni, setPrenotazioni] = useState<Prenotazione[]>([]);
@@ -68,14 +68,23 @@ export const MyBookingsScreen: React.FC = () => {
     );
   };
 
-  const getStatusColor = (status: Prenotazione['status']) => {
+  const getStatusStyles = (status: Prenotazione['status']) => {
     switch (status) {
       case 'confirmed':
-        return colors.success;
+        return {
+          bg: colors.successContainer,
+          text: colors.success,
+        };
       case 'cancelled':
-        return colors.error;
+        return {
+          bg: colors.errorContainer,
+          text: colors.error,
+        };
       default:
-        return colors.warning;
+        return {
+          bg: colors.warningContainer,
+          text: colors.warning,
+        };
     }
   };
 
@@ -99,55 +108,61 @@ export const MyBookingsScreen: React.FC = () => {
     });
   };
 
-  const renderBookingCard = ({ item }: { item: Prenotazione }) => (
-    <View style={styles.card}>
-      <View style={styles.cardHeader}>
-        <View
-          style={[
-            styles.statusBadge,
-            { backgroundColor: getStatusColor(item.status) },
-          ]}
-        >
-          <Text style={styles.statusText}>{getStatusText(item.status)}</Text>
+  const renderBookingCard = ({ item }: { item: Prenotazione }) => {
+    const statusStyles = getStatusStyles(item.status);
+
+    return (
+      <View style={[styles.card, elevation.level1]}>
+        <View style={styles.cardHeader}>
+          <View
+            style={[
+              styles.statusBadge,
+              { backgroundColor: statusStyles.bg },
+            ]}
+          >
+            <Text style={[styles.statusText, { color: statusStyles.text }]}>
+              {getStatusText(item.status)}
+            </Text>
+          </View>
+          <Text style={styles.bookingId}>{item.id}</Text>
         </View>
-        <Text style={styles.bookingId}>{item.id}</Text>
+
+        <Text style={styles.eventName}>{item.nomeEvento}</Text>
+
+        <View style={styles.detailsRow}>
+          <View style={styles.detail}>
+            <Text style={styles.detailIcon}>👤</Text>
+            <Text style={styles.detailText}>
+              {item.nome} {item.cognome}
+            </Text>
+          </View>
+          <View style={styles.detail}>
+            <Text style={styles.detailIcon}>🎫</Text>
+            <Text style={styles.detailText}>{item.numeroPosti} posti</Text>
+          </View>
+        </View>
+
+        <View style={styles.detailsRow}>
+          <View style={styles.detail}>
+            <Text style={styles.detailIcon}>📅</Text>
+            <Text style={styles.detailText}>
+              {formatDate(item.dataPrenotazione)}
+            </Text>
+          </View>
+        </View>
+
+        {item.status === 'confirmed' && (
+          <Button
+            title="Annulla Prenotazione"
+            onPress={() => handleCancelBooking(item)}
+            variant="outlined"
+            size="small"
+            style={styles.cancelButton}
+          />
+        )}
       </View>
-
-      <Text style={styles.eventName}>{item.nomeEvento}</Text>
-
-      <View style={styles.detailsRow}>
-        <View style={styles.detail}>
-          <Text style={styles.detailIcon}>👤</Text>
-          <Text style={styles.detailText}>
-            {item.nome} {item.cognome}
-          </Text>
-        </View>
-        <View style={styles.detail}>
-          <Text style={styles.detailIcon}>🎫</Text>
-          <Text style={styles.detailText}>{item.numeroPosti} posti</Text>
-        </View>
-      </View>
-
-      <View style={styles.detailsRow}>
-        <View style={styles.detail}>
-          <Text style={styles.detailIcon}>📅</Text>
-          <Text style={styles.detailText}>
-            {formatDate(item.dataPrenotazione)}
-          </Text>
-        </View>
-      </View>
-
-      {item.status === 'confirmed' && (
-        <Button
-          title="Annulla Prenotazione"
-          onPress={() => handleCancelBooking(item)}
-          variant="outline"
-          size="small"
-          style={styles.cancelButton}
-        />
-      )}
-    </View>
-  );
+    );
+  };
 
   if (loading) {
     return <LoadingSpinner message="Caricamento prenotazioni..." />;
@@ -155,7 +170,7 @@ export const MyBookingsScreen: React.FC = () => {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      <StatusBar barStyle="light-content" backgroundColor={colors.background} />
+      <StatusBar barStyle="dark-content" backgroundColor={colors.background} />
 
       <View style={styles.header}>
         <Text style={styles.title}>Le Mie Prenotazioni</Text>
@@ -203,12 +218,12 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.lg,
   },
   title: {
-    color: colors.text,
+    color: colors.onSurface,
     fontSize: fontSize.xxl,
     fontWeight: fontWeight.bold,
   },
   subtitle: {
-    color: colors.textSecondary,
+    color: colors.onSurfaceVariant,
     fontSize: fontSize.sm,
     marginTop: spacing.xs,
   },
@@ -217,7 +232,7 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.xl,
   },
   card: {
-    backgroundColor: colors.backgroundCard,
+    backgroundColor: colors.surfaceContainerLow,
     borderRadius: borderRadius.lg,
     padding: spacing.md,
     marginBottom: spacing.md,
@@ -234,16 +249,15 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.sm,
   },
   statusText: {
-    color: colors.text,
     fontSize: fontSize.xs,
     fontWeight: fontWeight.semibold,
   },
   bookingId: {
-    color: colors.textMuted,
+    color: colors.onSurfaceVariant,
     fontSize: fontSize.xs,
   },
   eventName: {
-    color: colors.text,
+    color: colors.onSurface,
     fontSize: fontSize.lg,
     fontWeight: fontWeight.semibold,
     marginBottom: spacing.sm,
@@ -262,7 +276,7 @@ const styles = StyleSheet.create({
     fontSize: fontSize.sm,
   },
   detailText: {
-    color: colors.textSecondary,
+    color: colors.onSurfaceVariant,
     fontSize: fontSize.sm,
   },
   cancelButton: {
@@ -277,12 +291,12 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
   },
   emptyText: {
-    color: colors.text,
+    color: colors.onSurface,
     fontSize: fontSize.lg,
     fontWeight: fontWeight.semibold,
   },
   emptySubtext: {
-    color: colors.textSecondary,
+    color: colors.onSurfaceVariant,
     fontSize: fontSize.md,
     marginTop: spacing.xs,
   },

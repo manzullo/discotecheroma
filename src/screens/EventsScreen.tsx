@@ -73,39 +73,42 @@ export const EventsScreen: React.FC<EventsScreenProps> = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      <StatusBar barStyle="light-content" backgroundColor={colors.background} />
+      <StatusBar barStyle="dark-content" backgroundColor={colors.background} />
 
       <View style={styles.header}>
         <Text style={styles.title}>Eventi</Text>
         <Text style={styles.subtitle}>{filteredEventi.length} eventi disponibili</Text>
       </View>
 
-      {/* Day Filter */}
+      {/* Day Filter - M3 Filter Chips */}
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
         style={styles.filterContainer}
         contentContainerStyle={styles.filterContent}
       >
-        {GIORNI.map((giorno) => (
-          <TouchableOpacity
-            key={giorno}
-            style={[
-              styles.filterButton,
-              selectedDay === giorno && styles.filterButtonActive,
-            ]}
-            onPress={() => setSelectedDay(giorno)}
-          >
-            <Text
+        {GIORNI.map((giorno) => {
+          const isSelected = selectedDay === giorno;
+          return (
+            <TouchableOpacity
+              key={giorno}
               style={[
-                styles.filterText,
-                selectedDay === giorno && styles.filterTextActive,
+                styles.filterChip,
+                isSelected && styles.filterChipSelected,
               ]}
+              onPress={() => setSelectedDay(giorno)}
             >
-              {giorno}
-            </Text>
-          </TouchableOpacity>
-        ))}
+              <Text
+                style={[
+                  styles.filterText,
+                  isSelected && styles.filterTextSelected,
+                ]}
+              >
+                {giorno}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
       </ScrollView>
 
       <FlatList
@@ -130,10 +133,10 @@ export const EventsScreen: React.FC<EventsScreenProps> = ({ navigation }) => {
         }
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
-            <Text style={styles.emptyIcon}>🎉</Text>
+            <Text style={styles.emptyIcon}>📅</Text>
             <Text style={styles.emptyText}>Nessun evento per {selectedDay}</Text>
             <Text style={styles.emptySubtext}>
-              Prova a selezionare un altro giorno!
+              Prova a selezionare un altro giorno
             </Text>
           </View>
         }
@@ -153,40 +156,43 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.sm,
   },
   title: {
-    color: colors.text,
+    color: colors.onSurface,
     fontSize: fontSize.xxl,
     fontWeight: fontWeight.bold,
   },
   subtitle: {
-    color: colors.textSecondary,
-    fontSize: fontSize.sm,
+    color: colors.onSurfaceVariant,
+    fontSize: fontSize.md,
     marginTop: spacing.xs,
   },
   filterContainer: {
-    maxHeight: 50,
+    maxHeight: 48,
     marginBottom: spacing.md,
   },
   filterContent: {
     paddingHorizontal: spacing.md,
     gap: spacing.sm,
   },
-  filterButton: {
+  filterChip: {
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
-    borderRadius: borderRadius.full,
-    backgroundColor: colors.backgroundCard,
+    borderRadius: borderRadius.sm,
+    backgroundColor: colors.surfaceContainerHigh,
     marginRight: spacing.sm,
+    borderWidth: 1,
+    borderColor: colors.outline,
   },
-  filterButtonActive: {
-    backgroundColor: colors.primary,
+  filterChipSelected: {
+    backgroundColor: colors.secondaryContainer,
+    borderColor: colors.secondary,
   },
   filterText: {
-    color: colors.textSecondary,
-    fontSize: fontSize.sm,
+    color: colors.onSurfaceVariant,
+    fontSize: fontSize.md,
     fontWeight: fontWeight.medium,
   },
-  filterTextActive: {
-    color: colors.text,
+  filterTextSelected: {
+    color: colors.onSecondaryContainer,
     fontWeight: fontWeight.semibold,
   },
   listContent: {
@@ -202,12 +208,12 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
   },
   emptyText: {
-    color: colors.text,
+    color: colors.onSurface,
     fontSize: fontSize.lg,
     fontWeight: fontWeight.semibold,
   },
   emptySubtext: {
-    color: colors.textSecondary,
+    color: colors.onSurfaceVariant,
     fontSize: fontSize.md,
     marginTop: spacing.xs,
   },

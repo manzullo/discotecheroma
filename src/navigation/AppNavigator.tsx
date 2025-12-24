@@ -32,7 +32,7 @@ const MainTabs = () => {
         headerShown: false,
         tabBarStyle: styles.tabBar,
         tabBarActiveTintColor: colors.primary,
-        tabBarInactiveTintColor: colors.textMuted,
+        tabBarInactiveTintColor: colors.onSurfaceVariant,
         tabBarLabelStyle: styles.tabBarLabel,
       }}
     >
@@ -87,9 +87,10 @@ export const AppNavigator = () => {
         component={EventDetailScreen}
         options={{
           headerShown: true,
-          headerTransparent: true,
+          headerTransparent: false,
           headerTitle: '',
-          headerTintColor: colors.text,
+          headerTintColor: colors.onSurface,
+          headerStyle: { backgroundColor: colors.background },
         }}
       />
       <Stack.Screen
@@ -99,7 +100,7 @@ export const AppNavigator = () => {
           headerShown: true,
           headerTitle: 'Prenota',
           headerStyle: { backgroundColor: colors.background },
-          headerTintColor: colors.text,
+          headerTintColor: colors.onSurface,
         }}
       />
       <Stack.Screen
@@ -116,8 +117,8 @@ export const AppNavigator = () => {
 
 const styles = StyleSheet.create({
   tabBar: {
-    backgroundColor: colors.backgroundCard,
-    borderTopColor: colors.border,
+    backgroundColor: colors.surfaceContainerLow,
+    borderTopColor: colors.outlineVariant,
     borderTopWidth: 1,
     height: 85,
     paddingBottom: 25,

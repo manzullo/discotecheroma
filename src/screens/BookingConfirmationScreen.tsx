@@ -8,10 +8,9 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { LinearGradient } from 'expo-linear-gradient';
 import { Button } from '../components';
 import { RootStackParamList } from '../types';
-import { colors, spacing, borderRadius, fontSize, fontWeight } from '../theme';
+import { colors, spacing, borderRadius, fontSize, fontWeight, elevation } from '../theme';
 
 type BookingConfirmationScreenProps = NativeStackScreenProps<
   RootStackParamList,
@@ -44,7 +43,7 @@ export const BookingConfirmationScreen: React.FC<
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor={colors.background} />
+      <StatusBar barStyle="dark-content" backgroundColor={colors.background} />
 
       <ScrollView
         style={styles.scrollView}
@@ -52,12 +51,9 @@ export const BookingConfirmationScreen: React.FC<
         showsVerticalScrollIndicator={false}
       >
         {/* Success Icon */}
-        <LinearGradient
-          colors={[colors.success, '#2E7D32']}
-          style={styles.successIcon}
-        >
+        <View style={styles.successIcon}>
           <Text style={styles.checkmark}>✓</Text>
-        </LinearGradient>
+        </View>
 
         <Text style={styles.title}>Prenotazione Confermata!</Text>
         <Text style={styles.subtitle}>
@@ -65,7 +61,7 @@ export const BookingConfirmationScreen: React.FC<
         </Text>
 
         {/* Booking Details Card */}
-        <View style={styles.card}>
+        <View style={[styles.card, elevation.level1]}>
           <View style={styles.cardHeader}>
             <Text style={styles.cardTitle}>Dettagli Prenotazione</Text>
             <View style={styles.bookingIdBadge}>
@@ -122,7 +118,7 @@ export const BookingConfirmationScreen: React.FC<
         </View>
 
         {/* Instructions */}
-        <View style={styles.instructionsCard}>
+        <View style={[styles.instructionsCard, elevation.level1]}>
           <Text style={styles.instructionsTitle}>📋 Cosa portare</Text>
           <Text style={styles.instructionsText}>
             • Documento d'identità valido{'\n'}
@@ -159,6 +155,7 @@ const styles = StyleSheet.create({
     width: 100,
     height: 100,
     borderRadius: 50,
+    backgroundColor: colors.successContainer,
     justifyContent: 'center',
     alignItems: 'center',
     marginTop: spacing.xl,
@@ -166,16 +163,16 @@ const styles = StyleSheet.create({
   },
   checkmark: {
     fontSize: 48,
-    color: colors.text,
+    color: colors.success,
   },
   title: {
-    color: colors.text,
+    color: colors.onSurface,
     fontSize: fontSize.xxl,
     fontWeight: fontWeight.bold,
     textAlign: 'center',
   },
   subtitle: {
-    color: colors.textSecondary,
+    color: colors.onSurfaceVariant,
     fontSize: fontSize.md,
     textAlign: 'center',
     marginTop: spacing.sm,
@@ -183,7 +180,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
   },
   card: {
-    backgroundColor: colors.backgroundCard,
+    backgroundColor: colors.surfaceContainerLow,
     borderRadius: borderRadius.lg,
     padding: spacing.md,
     width: '100%',
@@ -196,18 +193,18 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
   },
   cardTitle: {
-    color: colors.text,
+    color: colors.onSurface,
     fontSize: fontSize.lg,
     fontWeight: fontWeight.semibold,
   },
   bookingIdBadge: {
-    backgroundColor: colors.primary,
+    backgroundColor: colors.primaryContainer,
     paddingHorizontal: spacing.sm,
     paddingVertical: spacing.xs,
     borderRadius: borderRadius.sm,
   },
   bookingIdText: {
-    color: colors.text,
+    color: colors.onPrimaryContainer,
     fontSize: fontSize.xs,
     fontWeight: fontWeight.bold,
   },
@@ -215,36 +212,34 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.sm,
   },
   detailLabel: {
-    color: colors.textSecondary,
+    color: colors.onSurfaceVariant,
     fontSize: fontSize.sm,
     marginBottom: 2,
   },
   detailValue: {
-    color: colors.text,
+    color: colors.onSurface,
     fontSize: fontSize.md,
     fontWeight: fontWeight.medium,
   },
   divider: {
     height: 1,
-    backgroundColor: colors.border,
+    backgroundColor: colors.outlineVariant,
   },
   instructionsCard: {
-    backgroundColor: colors.backgroundLight,
+    backgroundColor: colors.tertiaryContainer,
     borderRadius: borderRadius.lg,
     padding: spacing.md,
     width: '100%',
     marginBottom: spacing.xl,
-    borderWidth: 1,
-    borderColor: colors.accent,
   },
   instructionsTitle: {
-    color: colors.text,
+    color: colors.onTertiaryContainer,
     fontSize: fontSize.md,
     fontWeight: fontWeight.semibold,
     marginBottom: spacing.sm,
   },
   instructionsText: {
-    color: colors.textSecondary,
+    color: colors.onTertiaryContainer,
     fontSize: fontSize.sm,
     lineHeight: 22,
   },

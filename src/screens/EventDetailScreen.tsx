@@ -4,23 +4,22 @@ import {
   Text,
   StyleSheet,
   ScrollView,
-  ImageBackground,
+  Image,
   Dimensions,
   StatusBar,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { LinearGradient } from 'expo-linear-gradient';
 import { Button } from '../components';
 import { RootStackParamList } from '../types';
-import { colors, spacing, borderRadius, fontSize, fontWeight } from '../theme';
+import { colors, spacing, borderRadius, fontSize, fontWeight, elevation } from '../theme';
 
 type EventDetailScreenProps = NativeStackScreenProps<
   RootStackParamList,
   'EventDetail'
 >;
 
-const { width, height } = Dimensions.get('window');
+const { width } = Dimensions.get('window');
 
 // Immagine placeholder
 const PLACEHOLDER_IMAGE = 'https://images.unsplash.com/photo-1571266028243-e4733b0f0bb0?w=800';
@@ -60,42 +59,34 @@ export const EventDetailScreen: React.FC<EventDetailScreenProps> = ({
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="light-content" translucent backgroundColor="transparent" />
+      <StatusBar barStyle="dark-content" backgroundColor={colors.background} />
 
       <ScrollView
         style={styles.scrollView}
         showsVerticalScrollIndicator={false}
-        bounces={false}
       >
         {/* Hero Image */}
-        <ImageBackground
-          source={{ uri: imageUrl }}
-          style={styles.heroImage}
-        >
-          <LinearGradient
-            colors={['transparent', colors.background]}
-            style={styles.heroGradient}
-          >
-            <SafeAreaView edges={['top']}>
-              <View style={styles.heroContent}>
-                {evento.prezzoMinimo && (
-                  <View style={styles.priceTag}>
-                    <Text style={styles.priceLabel}>A partire da</Text>
-                    <Text style={styles.priceValue}>{evento.prezzoMinimo}€</Text>
-                  </View>
-                )}
-              </View>
-            </SafeAreaView>
-          </LinearGradient>
-        </ImageBackground>
+        <View style={styles.heroContainer}>
+          <Image
+            source={{ uri: imageUrl }}
+            style={styles.heroImage}
+            resizeMode="cover"
+          />
+          {evento.prezzoMinimo && (
+            <View style={styles.priceTag}>
+              <Text style={styles.priceLabel}>A partire da</Text>
+              <Text style={styles.priceValue}>{evento.prezzoMinimo}€</Text>
+            </View>
+          )}
+        </View>
 
         {/* Content */}
         <View style={styles.content}>
           {/* Title */}
           <Text style={styles.title}>{evento.titolo}</Text>
 
-          {/* Day */}
-          <View style={styles.dayRow}>
+          {/* Day Chip */}
+          <View style={styles.dayChip}>
             <Text style={styles.dayIcon}>📅</Text>
             <Text style={styles.dayText}>{evento.giorno}</Text>
           </View>
@@ -112,7 +103,7 @@ export const EventDetailScreen: React.FC<EventDetailScreenProps> = ({
           )}
 
           {/* Info Cards */}
-          <View style={styles.infoCard}>
+          <View style={[styles.infoCard, elevation.level1]}>
             <Text style={styles.sectionTitle}>Dettagli Evento</Text>
             <InfoRow icon="📅" label="Giorno" value={evento.giorno} />
             <InfoRow icon="🔞" label="Età Minima" value={evento.etaMinima ? `${evento.etaMinima}+` : null} />
@@ -120,7 +111,7 @@ export const EventDetailScreen: React.FC<EventDetailScreenProps> = ({
 
           {/* Costi Liste */}
           {evento.costiListe && (
-            <View style={styles.infoCard}>
+            <View style={[styles.infoCard, elevation.level1]}>
               <Text style={styles.sectionTitle}>📋 Liste</Text>
               <Text style={styles.costiText}>{evento.costiListe}</Text>
             </View>
@@ -128,7 +119,7 @@ export const EventDetailScreen: React.FC<EventDetailScreenProps> = ({
 
           {/* Costi Tavoli */}
           {evento.costiTavoli && (
-            <View style={styles.infoCard}>
+            <View style={[styles.infoCard, elevation.level1]}>
               <Text style={styles.sectionTitle}>🪑 Tavoli</Text>
               <Text style={styles.costiText}>{evento.costiTavoli}</Text>
             </View>
@@ -136,7 +127,7 @@ export const EventDetailScreen: React.FC<EventDetailScreenProps> = ({
 
           {/* Costi Pacchetti */}
           {evento.costiPacchetti && (
-            <View style={styles.infoCard}>
+            <View style={[styles.infoCard, elevation.level1]}>
               <Text style={styles.sectionTitle}>🎁 Pacchetti</Text>
               <Text style={styles.costiText}>{evento.costiPacchetti}</Text>
             </View>
@@ -144,7 +135,7 @@ export const EventDetailScreen: React.FC<EventDetailScreenProps> = ({
 
           {/* Note */}
           {evento.note && (
-            <View style={styles.infoCard}>
+            <View style={[styles.infoCard, elevation.level1]}>
               <Text style={styles.sectionTitle}>📝 Note</Text>
               <Text style={styles.costiText}>{evento.note}</Text>
             </View>
@@ -157,25 +148,20 @@ export const EventDetailScreen: React.FC<EventDetailScreenProps> = ({
 
       {/* Fixed Booking Button */}
       <SafeAreaView edges={['bottom']} style={styles.bookingBar}>
-        <LinearGradient
-          colors={[colors.background, colors.backgroundLight]}
-          style={styles.bookingGradient}
-        >
-          <View style={styles.bookingContainer}>
-            <View style={styles.bookingInfo}>
-              <Text style={styles.bookingPrice}>
-                {evento.prezzoMinimo ? `da ${evento.prezzoMinimo}€` : 'Info'}
-              </Text>
-              <Text style={styles.bookingLabel}>Prenota in lista</Text>
-            </View>
-            <Button
-              title="Prenota Ora"
-              onPress={handleBooking}
-              size="large"
-              style={styles.bookingButton}
-            />
+        <View style={styles.bookingContainer}>
+          <View style={styles.bookingInfo}>
+            <Text style={styles.bookingPrice}>
+              {evento.prezzoMinimo ? `da ${evento.prezzoMinimo}€` : 'Info'}
+            </Text>
+            <Text style={styles.bookingLabel}>Prenota in lista</Text>
           </View>
-        </LinearGradient>
+          <Button
+            title="Prenota Ora"
+            onPress={handleBooking}
+            size="large"
+            style={styles.bookingButton}
+          />
+        </View>
       </SafeAreaView>
     </View>
   );
@@ -189,61 +175,62 @@ const styles = StyleSheet.create({
   scrollView: {
     flex: 1,
   },
-  heroImage: {
+  heroContainer: {
     width: width,
-    height: height * 0.45,
-    backgroundColor: colors.backgroundCard,
+    height: 280,
+    backgroundColor: colors.surfaceContainerHighest,
+    position: 'relative',
   },
-  heroGradient: {
-    flex: 1,
-    justifyContent: 'space-between',
-  },
-  heroContent: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    padding: spacing.md,
+  heroImage: {
+    width: '100%',
+    height: '100%',
   },
   priceTag: {
-    alignSelf: 'flex-end',
-    backgroundColor: colors.primary,
+    position: 'absolute',
+    bottom: spacing.md,
+    right: spacing.md,
+    backgroundColor: colors.primaryContainer,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
     borderRadius: borderRadius.md,
     alignItems: 'center',
   },
   priceLabel: {
-    color: colors.text,
+    color: colors.onPrimaryContainer,
     fontSize: fontSize.xs,
-    opacity: 0.8,
   },
   priceValue: {
-    color: colors.text,
+    color: colors.onPrimaryContainer,
     fontSize: fontSize.xl,
     fontWeight: fontWeight.bold,
   },
   content: {
     padding: spacing.md,
-    marginTop: -spacing.lg,
   },
   title: {
-    color: colors.text,
-    fontSize: fontSize.title,
+    color: colors.onSurface,
+    fontSize: fontSize.xxl,
     fontWeight: fontWeight.bold,
-    lineHeight: 40,
+    lineHeight: 36,
   },
-  dayRow: {
+  dayChip: {
     flexDirection: 'row',
     alignItems: 'center',
     marginTop: spacing.sm,
     gap: spacing.xs,
+    backgroundColor: colors.secondaryContainer,
+    alignSelf: 'flex-start',
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
+    borderRadius: borderRadius.sm,
   },
   dayIcon: {
     fontSize: fontSize.md,
   },
   dayText: {
-    color: colors.textSecondary,
+    color: colors.onSecondaryContainer,
     fontSize: fontSize.md,
-    fontWeight: fontWeight.semibold,
+    fontWeight: fontWeight.medium,
   },
   tagsContainer: {
     flexDirection: 'row',
@@ -252,25 +239,25 @@ const styles = StyleSheet.create({
     marginTop: spacing.md,
   },
   tag: {
-    backgroundColor: colors.backgroundCard,
+    backgroundColor: colors.surfaceContainerHigh,
     paddingHorizontal: spacing.sm,
     paddingVertical: spacing.xs,
-    borderRadius: borderRadius.full,
+    borderRadius: borderRadius.sm,
     borderWidth: 1,
-    borderColor: colors.primary,
+    borderColor: colors.outline,
   },
   tagText: {
-    color: colors.primaryLight,
+    color: colors.onSurfaceVariant,
     fontSize: fontSize.sm,
   },
   infoCard: {
-    backgroundColor: colors.backgroundCard,
+    backgroundColor: colors.surfaceContainerLow,
     borderRadius: borderRadius.lg,
     padding: spacing.md,
     marginTop: spacing.md,
   },
   sectionTitle: {
-    color: colors.text,
+    color: colors.onSurface,
     fontSize: fontSize.lg,
     fontWeight: fontWeight.semibold,
     marginBottom: spacing.md,
@@ -280,7 +267,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: spacing.sm,
     borderBottomWidth: 1,
-    borderBottomColor: colors.border,
+    borderBottomColor: colors.outlineVariant,
   },
   infoIcon: {
     fontSize: fontSize.lg,
@@ -290,16 +277,16 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   infoLabel: {
-    color: colors.textSecondary,
+    color: colors.onSurfaceVariant,
     fontSize: fontSize.xs,
   },
   infoValue: {
-    color: colors.text,
+    color: colors.onSurface,
     fontSize: fontSize.md,
     fontWeight: fontWeight.medium,
   },
   costiText: {
-    color: colors.text,
+    color: colors.onSurface,
     fontSize: fontSize.md,
     lineHeight: 24,
   },
@@ -308,27 +295,27 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-  },
-  bookingGradient: {
-    paddingTop: spacing.md,
+    backgroundColor: colors.surface,
+    borderTopWidth: 1,
+    borderTopColor: colors.outlineVariant,
   },
   bookingContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: spacing.md,
-    paddingBottom: spacing.md,
+    paddingVertical: spacing.md,
     gap: spacing.md,
   },
   bookingInfo: {
     flex: 1,
   },
   bookingPrice: {
-    color: colors.text,
+    color: colors.onSurface,
     fontSize: fontSize.xl,
     fontWeight: fontWeight.bold,
   },
   bookingLabel: {
-    color: colors.textSecondary,
+    color: colors.onSurfaceVariant,
     fontSize: fontSize.sm,
   },
   bookingButton: {

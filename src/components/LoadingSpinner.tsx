@@ -26,7 +26,7 @@ const styles = StyleSheet.create({
     gap: spacing.md,
   },
   message: {
-    color: colors.textSecondary,
+    color: colors.onSurfaceVariant,
     fontSize: fontSize.md,
   },
 });

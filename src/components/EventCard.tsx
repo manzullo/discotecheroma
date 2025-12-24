@@ -4,12 +4,11 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-  ImageBackground,
+  Image,
   Dimensions,
 } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
 import { Evento } from '../types';
-import { colors, spacing, borderRadius, fontSize, fontWeight } from '../theme';
+import { colors, spacing, borderRadius, fontSize, fontWeight, elevation } from '../theme';
 
 interface EventCardProps {
   evento: Evento;
@@ -28,64 +27,58 @@ export const EventCard: React.FC<EventCardProps> = ({
   variant = 'large',
 }) => {
   const isLarge = variant === 'large';
-  const cardHeight = isLarge ? 220 : 150;
+  const imageHeight = isLarge ? 180 : 120;
 
   const imageUrl = evento.immagine || PLACEHOLDER_IMAGE;
 
   return (
     <TouchableOpacity
-      style={[styles.container, { height: cardHeight }]}
+      style={[styles.container, elevation.level1]}
       onPress={onPress}
-      activeOpacity={0.9}
+      activeOpacity={0.8}
     >
-      <ImageBackground
-        source={{ uri: imageUrl }}
-        style={styles.imageBackground}
-        imageStyle={styles.image}
-      >
-        <LinearGradient
-          colors={['transparent', 'rgba(0,0,0,0.8)', 'rgba(0,0,0,0.95)']}
-          style={styles.gradient}
-        >
-          <View style={styles.content}>
-            <View style={styles.header}>
-              <View style={styles.dayBox}>
-                <Text style={styles.dayText}>{evento.giorno}</Text>
-              </View>
-              {evento.prezzoMinimo && (
-                <View style={styles.priceBox}>
-                  <Text style={styles.priceText}>
-                    da {evento.prezzoMinimo}€
-                  </Text>
-                </View>
-              )}
+      {/* Image */}
+      <View style={[styles.imageContainer, { height: imageHeight }]}>
+        <Image
+          source={{ uri: imageUrl }}
+          style={styles.image}
+          resizeMode="cover"
+        />
+        {/* Day chip overlay */}
+        <View style={styles.dayChip}>
+          <Text style={styles.dayText}>{evento.giorno}</Text>
+        </View>
+      </View>
+
+      {/* Content */}
+      <View style={styles.content}>
+        {/* Title */}
+        <Text style={styles.title} numberOfLines={2}>
+          {evento.titolo}
+        </Text>
+
+        {/* Music genres */}
+        {evento.generiMusicali.length > 0 && (
+          <Text style={styles.genres} numberOfLines={1}>
+            {evento.generiMusicali.slice(0, 3).join(' • ')}
+          </Text>
+        )}
+
+        {/* Bottom row: price and age */}
+        <View style={styles.bottomRow}>
+          {evento.prezzoMinimo && (
+            <View style={styles.priceContainer}>
+              <Text style={styles.priceLabel}>Da </Text>
+              <Text style={styles.priceValue}>{evento.prezzoMinimo}€</Text>
             </View>
-
-            <View style={styles.info}>
-              <Text style={styles.title} numberOfLines={2}>
-                {evento.titolo}
-              </Text>
-
-              {evento.etaMinima && (
-                <View style={styles.ageRow}>
-                  <Text style={styles.ageIcon}>🔞</Text>
-                  <Text style={styles.ageText}>{evento.etaMinima}+</Text>
-                </View>
-              )}
-
-              {isLarge && evento.generiMusicali.length > 0 && (
-                <View style={styles.tagsRow}>
-                  {evento.generiMusicali.slice(0, 3).map((tag, index) => (
-                    <View key={index} style={styles.tag}>
-                      <Text style={styles.tagText}>{tag}</Text>
-                    </View>
-                  ))}
-                </View>
-              )}
+          )}
+          {evento.etaMinima && (
+            <View style={styles.ageChip}>
+              <Text style={styles.ageText}>{evento.etaMinima}+</Text>
             </View>
-          </View>
-        </LinearGradient>
-      </ImageBackground>
+          )}
+        </View>
+      </View>
     </TouchableOpacity>
   );
 };
@@ -93,89 +86,77 @@ export const EventCard: React.FC<EventCardProps> = ({
 const styles = StyleSheet.create({
   container: {
     width: width - spacing.md * 2,
-    borderRadius: borderRadius.lg,
+    backgroundColor: colors.surfaceContainerLow,
+    borderRadius: borderRadius.md,
     overflow: 'hidden',
     marginBottom: spacing.md,
   },
-  imageBackground: {
-    flex: 1,
-    backgroundColor: colors.backgroundCard,
+  imageContainer: {
+    width: '100%',
+    backgroundColor: colors.surfaceContainerHighest,
+    position: 'relative',
   },
   image: {
-    borderRadius: borderRadius.lg,
+    width: '100%',
+    height: '100%',
   },
-  gradient: {
-    flex: 1,
-    justifyContent: 'space-between',
-    padding: spacing.md,
-  },
-  content: {
-    flex: 1,
-    justifyContent: 'space-between',
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-  },
-  dayBox: {
-    backgroundColor: colors.primary,
+  dayChip: {
+    position: 'absolute',
+    top: spacing.sm,
+    left: spacing.sm,
+    backgroundColor: colors.primaryContainer,
     paddingHorizontal: spacing.sm,
     paddingVertical: spacing.xs,
     borderRadius: borderRadius.sm,
   },
   dayText: {
-    color: colors.text,
+    color: colors.onPrimaryContainer,
     fontSize: fontSize.sm,
-    fontWeight: fontWeight.semibold,
-    textTransform: 'uppercase',
+    fontWeight: fontWeight.medium,
   },
-  priceBox: {
-    backgroundColor: colors.accent,
+  content: {
+    padding: spacing.md,
+    gap: spacing.xs,
+  },
+  title: {
+    color: colors.onSurface,
+    fontSize: fontSize.lg,
+    fontWeight: fontWeight.medium,
+    lineHeight: 22,
+  },
+  genres: {
+    color: colors.onSurfaceVariant,
+    fontSize: fontSize.md,
+  },
+  bottomRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: spacing.xs,
+  },
+  priceContainer: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+  },
+  priceLabel: {
+    color: colors.onSurfaceVariant,
+    fontSize: fontSize.md,
+  },
+  priceValue: {
+    color: colors.primary,
+    fontSize: fontSize.lg,
+    fontWeight: fontWeight.semibold,
+  },
+  ageChip: {
+    backgroundColor: colors.secondaryContainer,
     paddingHorizontal: spacing.sm,
     paddingVertical: spacing.xs,
     borderRadius: borderRadius.sm,
   },
-  priceText: {
-    color: colors.text,
-    fontSize: fontSize.sm,
-    fontWeight: fontWeight.bold,
-  },
-  info: {
-    gap: spacing.xs,
-  },
-  title: {
-    color: colors.text,
-    fontSize: fontSize.xl,
-    fontWeight: fontWeight.bold,
-    lineHeight: 28,
-  },
-  ageRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.xs,
-  },
-  ageIcon: {
-    fontSize: fontSize.sm,
-  },
   ageText: {
-    color: colors.textSecondary,
+    color: colors.onSecondaryContainer,
     fontSize: fontSize.sm,
-  },
-  tagsRow: {
-    flexDirection: 'row',
-    gap: spacing.xs,
-    marginTop: spacing.xs,
-  },
-  tag: {
-    backgroundColor: 'rgba(255,255,255,0.15)',
-    paddingHorizontal: spacing.sm,
-    paddingVertical: 2,
-    borderRadius: borderRadius.full,
-  },
-  tagText: {
-    color: colors.textSecondary,
-    fontSize: fontSize.xs,
+    fontWeight: fontWeight.medium,
   },
 });
 

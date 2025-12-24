@@ -14,7 +14,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Button, Input } from '../components';
 import { savePrenotazione } from '../services/api';
 import { RootStackParamList } from '../types';
-import { colors, spacing, borderRadius, fontSize, fontWeight } from '../theme';
+import { colors, spacing, borderRadius, fontSize, fontWeight, elevation } from '../theme';
 
 type BookingScreenProps = NativeStackScreenProps<RootStackParamList, 'Booking'>;
 
@@ -124,7 +124,7 @@ export const BookingScreen: React.FC<BookingScreenProps> = ({
 
   return (
     <SafeAreaView style={styles.container} edges={['bottom']}>
-      <StatusBar barStyle="light-content" backgroundColor={colors.background} />
+      <StatusBar barStyle="dark-content" backgroundColor={colors.background} />
 
       <KeyboardAvoidingView
         style={styles.keyboardView}
@@ -136,7 +136,7 @@ export const BookingScreen: React.FC<BookingScreenProps> = ({
           showsVerticalScrollIndicator={false}
         >
           {/* Event Summary */}
-          <View style={styles.eventSummary}>
+          <View style={[styles.eventSummary, elevation.level1]}>
             <Text style={styles.eventTitle}>{evento.titolo}</Text>
             <View style={styles.eventDetails}>
               <View style={styles.eventDetail}>
@@ -224,7 +224,7 @@ export const BookingScreen: React.FC<BookingScreenProps> = ({
           </View>
 
           {/* Info */}
-          <View style={styles.infoBox}>
+          <View style={[styles.infoBox, elevation.level1]}>
             <Text style={styles.infoTitle}>Come funziona?</Text>
             <Text style={styles.infoText}>
               Inserisci i tuoi dati per entrare in lista. Riceverai una conferma via email.
@@ -265,7 +265,7 @@ const styles = StyleSheet.create({
     padding: spacing.md,
   },
   eventSummary: {
-    backgroundColor: colors.backgroundCard,
+    backgroundColor: colors.surfaceContainerLow,
     borderRadius: borderRadius.lg,
     padding: spacing.md,
     marginBottom: spacing.lg,
@@ -273,7 +273,7 @@ const styles = StyleSheet.create({
     borderLeftColor: colors.primary,
   },
   eventTitle: {
-    color: colors.text,
+    color: colors.onSurface,
     fontSize: fontSize.lg,
     fontWeight: fontWeight.bold,
   },
@@ -290,14 +290,14 @@ const styles = StyleSheet.create({
     fontSize: fontSize.sm,
   },
   eventDetailText: {
-    color: colors.textSecondary,
+    color: colors.onSurfaceVariant,
     fontSize: fontSize.sm,
   },
   form: {
     marginBottom: spacing.lg,
   },
   formTitle: {
-    color: colors.text,
+    color: colors.onSurface,
     fontSize: fontSize.xl,
     fontWeight: fontWeight.semibold,
     marginBottom: spacing.md,
@@ -307,19 +307,19 @@ const styles = StyleSheet.create({
     textAlignVertical: 'top',
   },
   infoBox: {
-    backgroundColor: colors.backgroundCard,
+    backgroundColor: colors.secondaryContainer,
     borderRadius: borderRadius.lg,
     padding: spacing.md,
     marginBottom: spacing.lg,
   },
   infoTitle: {
-    color: colors.text,
+    color: colors.onSecondaryContainer,
     fontSize: fontSize.md,
     fontWeight: fontWeight.semibold,
     marginBottom: spacing.xs,
   },
   infoText: {
-    color: colors.textSecondary,
+    color: colors.onSecondaryContainer,
     fontSize: fontSize.sm,
     lineHeight: 20,
   },
@@ -327,7 +327,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
   },
   disclaimer: {
-    color: colors.textMuted,
+    color: colors.onSurfaceVariant,
     fontSize: fontSize.xs,
     textAlign: 'center',
     lineHeight: 18,

@@ -10,8 +10,7 @@ import {
   StatusBar,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { LinearGradient } from 'expo-linear-gradient';
-import { colors, spacing, borderRadius, fontSize, fontWeight } from '../theme';
+import { colors, spacing, borderRadius, fontSize, fontWeight, elevation } from '../theme';
 
 export const ProfileScreen: React.FC = () => {
   const handleLink = (url: string) => {
@@ -47,7 +46,7 @@ export const ProfileScreen: React.FC = () => {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      <StatusBar barStyle="light-content" backgroundColor={colors.background} />
+      <StatusBar barStyle="dark-content" backgroundColor={colors.background} />
 
       <ScrollView
         style={styles.scrollView}
@@ -55,10 +54,7 @@ export const ProfileScreen: React.FC = () => {
         showsVerticalScrollIndicator={false}
       >
         {/* Profile Header */}
-        <LinearGradient
-          colors={[colors.backgroundCard, colors.backgroundLight]}
-          style={styles.profileHeader}
-        >
+        <View style={[styles.profileHeader, elevation.level1]}>
           <View style={styles.avatar}>
             <Text style={styles.avatarText}>👤</Text>
           </View>
@@ -66,12 +62,12 @@ export const ProfileScreen: React.FC = () => {
           <Text style={styles.guestSubtext}>
             Accedi per salvare le tue prenotazioni
           </Text>
-        </LinearGradient>
+        </View>
 
         {/* Menu Sections */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Account</Text>
-          <View style={styles.menuCard}>
+          <View style={[styles.menuCard, elevation.level1]}>
             <MenuItem
               icon="🔐"
               title="Accedi / Registrati"
@@ -83,7 +79,7 @@ export const ProfileScreen: React.FC = () => {
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Preferenze</Text>
-          <View style={styles.menuCard}>
+          <View style={[styles.menuCard, elevation.level1]}>
             <MenuItem
               icon="🔔"
               title="Notifiche"
@@ -92,17 +88,17 @@ export const ProfileScreen: React.FC = () => {
             />
             <View style={styles.menuDivider} />
             <MenuItem
-              icon="🌙"
+              icon="🎨"
               title="Tema"
-              subtitle="Dark mode attivo"
-              onPress={() => Alert.alert('Info', 'Tema dark sempre attivo')}
+              subtitle="Material Design 3"
+              onPress={() => Alert.alert('Info', 'Tema Material Design 3 attivo')}
             />
           </View>
         </View>
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Supporto</Text>
-          <View style={styles.menuCard}>
+          <View style={[styles.menuCard, elevation.level1]}>
             <MenuItem
               icon="❓"
               title="FAQ"
@@ -128,7 +124,7 @@ export const ProfileScreen: React.FC = () => {
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Legale</Text>
-          <View style={styles.menuCard}>
+          <View style={[styles.menuCard, elevation.level1]}>
             <MenuItem
               icon="📄"
               title="Termini di Servizio"
@@ -173,28 +169,27 @@ const styles = StyleSheet.create({
     marginHorizontal: spacing.md,
     marginTop: spacing.md,
     borderRadius: borderRadius.lg,
+    backgroundColor: colors.surfaceContainerLow,
   },
   avatar: {
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: colors.backgroundCard,
+    backgroundColor: colors.primaryContainer,
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 3,
-    borderColor: colors.primary,
     marginBottom: spacing.md,
   },
   avatarText: {
     fontSize: 36,
   },
   guestText: {
-    color: colors.text,
+    color: colors.onSurface,
     fontSize: fontSize.xl,
     fontWeight: fontWeight.bold,
   },
   guestSubtext: {
-    color: colors.textSecondary,
+    color: colors.onSurfaceVariant,
     fontSize: fontSize.sm,
     marginTop: spacing.xs,
   },
@@ -203,7 +198,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
   },
   sectionTitle: {
-    color: colors.textSecondary,
+    color: colors.onSurfaceVariant,
     fontSize: fontSize.sm,
     fontWeight: fontWeight.semibold,
     marginBottom: spacing.sm,
@@ -211,7 +206,7 @@ const styles = StyleSheet.create({
     letterSpacing: 1,
   },
   menuCard: {
-    backgroundColor: colors.backgroundCard,
+    backgroundColor: colors.surfaceContainerLow,
     borderRadius: borderRadius.lg,
     overflow: 'hidden',
   },
@@ -228,22 +223,22 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   menuTitle: {
-    color: colors.text,
+    color: colors.onSurface,
     fontSize: fontSize.md,
     fontWeight: fontWeight.medium,
   },
   menuSubtitle: {
-    color: colors.textSecondary,
+    color: colors.onSurfaceVariant,
     fontSize: fontSize.sm,
     marginTop: 2,
   },
   menuArrow: {
-    color: colors.textMuted,
+    color: colors.onSurfaceVariant,
     fontSize: fontSize.xl,
   },
   menuDivider: {
     height: 1,
-    backgroundColor: colors.border,
+    backgroundColor: colors.outlineVariant,
     marginLeft: 48,
   },
   appInfo: {
@@ -257,12 +252,12 @@ const styles = StyleSheet.create({
     fontWeight: fontWeight.bold,
   },
   appVersion: {
-    color: colors.textMuted,
+    color: colors.onSurfaceVariant,
     fontSize: fontSize.sm,
     marginTop: spacing.xs,
   },
   copyright: {
-    color: colors.textMuted,
+    color: colors.onSurfaceVariant,
     fontSize: fontSize.xs,
     marginTop: spacing.md,
     textAlign: 'center',
