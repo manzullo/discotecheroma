@@ -8,6 +8,7 @@ import {
   Platform,
   Alert,
   StatusBar,
+  TouchableOpacity,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -23,7 +24,7 @@ interface FormData {
   cognome: string;
   email: string;
   telefono: string;
-  numeroPosti: string;
+  numeroPosti: number;
   note: string;
 }
 
@@ -46,7 +47,7 @@ export const BookingScreen: React.FC<BookingScreenProps> = ({
     cognome: '',
     email: '',
     telefono: '',
-    numeroPosti: '1',
+    numeroPosti: 1,
     note: '',
   });
   const [errors, setErrors] = useState<FormErrors>({});
@@ -71,9 +72,9 @@ export const BookingScreen: React.FC<BookingScreenProps> = ({
     } else if (!/^[0-9+\s-]{8,}$/.test(formData.telefono)) {
       newErrors.telefono = 'Inserisci un numero valido';
     }
-    if (!formData.numeroPosti || parseInt(formData.numeroPosti) < 1) {
+    if (formData.numeroPosti < 1) {
       newErrors.numeroPosti = 'Inserisci almeno 1 posto';
-    } else if (parseInt(formData.numeroPosti) > 10) {
+    } else if (formData.numeroPosti > 10) {
       newErrors.numeroPosti = 'Massimo 10 posti per prenotazione';
     }
 
@@ -96,7 +97,7 @@ export const BookingScreen: React.FC<BookingScreenProps> = ({
         cognome: formData.cognome,
         email: formData.email,
         telefono: formData.telefono,
-        numeroPosti: parseInt(formData.numeroPosti),
+        numeroPosti: formData.numeroPosti,
         note: formData.note,
       });
 
@@ -112,10 +113,22 @@ export const BookingScreen: React.FC<BookingScreenProps> = ({
     }
   };
 
-  const updateField = (field: keyof FormData, value: string) => {
+  const updateField = (field: keyof FormData, value: string | number) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
     if (errors[field as keyof FormErrors]) {
       setErrors((prev) => ({ ...prev, [field]: undefined }));
+    }
+  };
+
+  const incrementPosti = () => {
+    if (formData.numeroPosti < 10) {
+      updateField('numeroPosti', formData.numeroPosti + 1);
+    }
+  };
+
+  const decrementPosti = () => {
+    if (formData.numeroPosti > 1) {
+      updateField('numeroPosti', formData.numeroPosti - 1);
     }
   };
 
@@ -203,14 +216,52 @@ export const BookingScreen: React.FC<BookingScreenProps> = ({
               keyboardType="phone-pad"
             />
 
-            <Input
-              label="Numero di posti *"
-              placeholder="1"
-              value={formData.numeroPosti}
-              onChangeText={(value) => updateField('numeroPosti', value)}
-              error={errors.numeroPosti}
-              keyboardType="number-pad"
-            />
+            {/* Numero Posti Stepper */}
+            <View style={styles.stepperContainer}>
+              <Text style={styles.stepperLabel}>Numero di posti *</Text>
+              <View style={styles.stepper}>
+                <TouchableOpacity
+                  style={[
+                    styles.stepperButton,
+                    formData.numeroPosti <= 1 && styles.stepperButtonDisabled,
+                  ]}
+                  onPress={decrementPosti}
+                  disabled={formData.numeroPosti <= 1}
+                >
+                  <Text
+                    style={[
+                      styles.stepperButtonText,
+                      formData.numeroPosti <= 1 && styles.stepperButtonTextDisabled,
+                    ]}
+                  >
+                    −
+                  </Text>
+                </TouchableOpacity>
+                <View style={styles.stepperValue}>
+                  <Text style={styles.stepperValueText}>{formData.numeroPosti}</Text>
+                </View>
+                <TouchableOpacity
+                  style={[
+                    styles.stepperButton,
+                    formData.numeroPosti >= 10 && styles.stepperButtonDisabled,
+                  ]}
+                  onPress={incrementPosti}
+                  disabled={formData.numeroPosti >= 10}
+                >
+                  <Text
+                    style={[
+                      styles.stepperButtonText,
+                      formData.numeroPosti >= 10 && styles.stepperButtonTextDisabled,
+                    ]}
+                  >
+                    +
+                  </Text>
+                </TouchableOpacity>
+              </View>
+              {errors.numeroPosti && (
+                <Text style={styles.errorText}>{errors.numeroPosti}</Text>
+              )}
+            </View>
 
             <Input
               label="Note (opzionale)"
@@ -218,8 +269,7 @@ export const BookingScreen: React.FC<BookingScreenProps> = ({
               value={formData.note}
               onChangeText={(value) => updateField('note', value)}
               multiline
-              numberOfLines={3}
-              style={styles.notesInput}
+              numberOfLines={4}
             />
           </View>
 
@@ -302,9 +352,58 @@ const styles = StyleSheet.create({
     fontWeight: fontWeight.semibold,
     marginBottom: spacing.md,
   },
-  notesInput: {
-    minHeight: 80,
-    textAlignVertical: 'top',
+  stepperContainer: {
+    marginBottom: spacing.md,
+  },
+  stepperLabel: {
+    color: colors.onSurface,
+    fontSize: fontSize.sm,
+    fontWeight: fontWeight.medium,
+    marginBottom: spacing.xs,
+  },
+  stepper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.surfaceContainerHighest,
+    borderRadius: borderRadius.sm,
+    borderWidth: 1,
+    borderColor: colors.outline,
+    overflow: 'hidden',
+  },
+  stepperButton: {
+    width: 56,
+    height: 48,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: colors.surfaceContainerHigh,
+  },
+  stepperButtonDisabled: {
+    backgroundColor: colors.surfaceContainerHighest,
+  },
+  stepperButtonText: {
+    fontSize: 24,
+    color: colors.primary,
+    fontWeight: fontWeight.medium,
+  },
+  stepperButtonTextDisabled: {
+    color: colors.outline,
+  },
+  stepperValue: {
+    flex: 1,
+    height: 48,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: colors.surfaceContainerHighest,
+  },
+  stepperValueText: {
+    fontSize: fontSize.xl,
+    color: colors.onSurface,
+    fontWeight: fontWeight.semibold,
+  },
+  errorText: {
+    color: colors.error,
+    fontSize: fontSize.xs,
+    marginTop: spacing.xs,
   },
   infoBox: {
     backgroundColor: colors.secondaryContainer,
