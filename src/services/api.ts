@@ -3,7 +3,7 @@ import { Evento, EventoAPI, Prenotazione } from '../types';
 
 const API_BASE_URL = 'https://www.partyspot.it/wp-json/eventi';
 
-// Mappa dei giorni della settimana
+// Mappa dei giorni della settimana con ordine
 const GIORNI_MAP: Record<string, string> = {
   lunedi: 'Lunedì',
   martedi: 'Martedì',
@@ -12,6 +12,26 @@ const GIORNI_MAP: Record<string, string> = {
   venerdi: 'Venerdì',
   sabato: 'Sabato',
   domenica: 'Domenica',
+};
+
+// Ordine dei giorni per ordinamento
+const GIORNI_ORDINE: Record<string, number> = {
+  'Lunedì': 1,
+  'Martedì': 2,
+  'Mercoledì': 3,
+  'Giovedì': 4,
+  'Venerdì': 5,
+  'Sabato': 6,
+  'Domenica': 7,
+};
+
+// Funzione per ordinare eventi per giorno della settimana
+const ordinaPerGiorno = (eventi: Evento[]): Evento[] => {
+  return eventi.sort((a, b) => {
+    const ordineA = GIORNI_ORDINE[a.giorno] || 99;
+    const ordineB = GIORNI_ORDINE[b.giorno] || 99;
+    return ordineA - ordineB;
+  });
 };
 
 // Funzione per rimuovere i tag HTML
@@ -83,10 +103,12 @@ export const fetchEventi = async (giorno?: string): Promise<Evento[]> => {
 
     const data: EventoAPI[] = await response.json();
 
-    // Trasforma e filtra solo gli eventi attivi con immagine
-    return data
+    // Trasforma, filtra eventi attivi e ordina per giorno
+    const eventi = data
       .map(trasformaEvento)
       .filter(evento => evento.stato.includes('attivo'));
+
+    return ordinaPerGiorno(eventi);
   } catch (error) {
     console.error('Errore nel caricamento eventi:', error);
     throw error;
