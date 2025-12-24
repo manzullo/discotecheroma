@@ -9,11 +9,10 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { LinearGradient } from 'expo-linear-gradient';
 import { EventCard, LoadingSpinner } from '../components';
 import { fetchEventi } from '../services/api';
 import { Evento, RootStackParamList } from '../types';
-import { colors, spacing, fontSize, fontWeight } from '../theme';
+import { colors, spacing, fontSize, fontWeight, borderRadius, elevation } from '../theme';
 
 type HomeScreenProps = {
   navigation: NativeStackNavigationProp<RootStackParamList>;
@@ -49,12 +48,26 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
     navigation.navigate('EventDetail', { evento });
   };
 
-  // Ordina gli eventi per data e prendi i prossimi
-  const sortedEventi = [...eventi].sort(
-    (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+  // Ottieni il giorno corrente della settimana
+  const oggi = new Date();
+  const giornoCorrente = oggi.toLocaleDateString('it-IT', { weekday: 'long' });
+  const giornoCapitalized = giornoCorrente.charAt(0).toUpperCase() + giornoCorrente.slice(1);
+
+  // Filtra eventi per oggi
+  const eventiOggi = eventi.filter(e => e.giorno === giornoCapitalized);
+
+  // Eventi del weekend (venerdì, sabato, domenica)
+  const eventiWeekend = eventi.filter(e =>
+    ['Venerdì', 'Sabato', 'Domenica'].includes(e.giorno)
   );
-  const featuredEvent = sortedEventi[0];
-  const upcomingEvents = sortedEventi.slice(1, 5);
+
+  // Prendi alcuni eventi in evidenza (quelli con immagine)
+  const eventiInEvidenza = eventi
+    .filter(e => e.immagine)
+    .slice(0, 5);
+
+  // Conta locali unici
+  const localiUnici = new Set(eventi.map(e => e.titolo.split(' - ')[0])).size;
 
   if (loading) {
     return <LoadingSpinner message="Caricamento eventi..." />;
@@ -62,7 +75,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      <StatusBar barStyle="light-content" backgroundColor={colors.background} />
+      <StatusBar barStyle="dark-content" backgroundColor={colors.background} />
 
       <ScrollView
         style={styles.scrollView}
@@ -80,34 +93,45 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
         {/* Header */}
         <View style={styles.header}>
           <Text style={styles.greeting}>Benvenuto su</Text>
-          <LinearGradient
-            colors={[colors.primary, colors.accent]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 0 }}
-            style={styles.logoGradient}
-          >
-            <Text style={styles.logo}>Discoteche Roma</Text>
-          </LinearGradient>
+          <Text style={styles.logo}>Discoteche Roma</Text>
           <Text style={styles.subtitle}>Le migliori serate della capitale</Text>
         </View>
 
-        {/* Featured Event */}
-        {featuredEvent && (
+        {/* Eventi di oggi */}
+        {eventiOggi.length > 0 && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>🔥 In Evidenza</Text>
-            <EventCard
-              evento={featuredEvent}
-              onPress={() => handleEventPress(featuredEvent)}
-              variant="large"
-            />
+            <Text style={styles.sectionTitle}>Stasera - {giornoCapitalized}</Text>
+            {eventiOggi.slice(0, 3).map((evento) => (
+              <EventCard
+                key={evento.id}
+                evento={evento}
+                onPress={() => handleEventPress(evento)}
+                variant="large"
+              />
+            ))}
           </View>
         )}
 
-        {/* Upcoming Events */}
-        {upcomingEvents.length > 0 && (
+        {/* In Evidenza */}
+        {eventiInEvidenza.length > 0 && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>📅 Prossimi Eventi</Text>
-            {upcomingEvents.map((evento) => (
+            <Text style={styles.sectionTitle}>In Evidenza</Text>
+            {eventiInEvidenza.slice(0, 3).map((evento) => (
+              <EventCard
+                key={evento.id}
+                evento={evento}
+                onPress={() => handleEventPress(evento)}
+                variant="compact"
+              />
+            ))}
+          </View>
+        )}
+
+        {/* Weekend */}
+        {eventiWeekend.length > 0 && !eventiOggi.length && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Questo Weekend</Text>
+            {eventiWeekend.slice(0, 4).map((evento) => (
               <EventCard
                 key={evento.id}
                 evento={evento}
@@ -119,15 +143,17 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
         )}
 
         {/* Quick Stats */}
-        <View style={styles.statsContainer}>
+        <View style={[styles.statsContainer, elevation.level1]}>
           <View style={styles.statBox}>
             <Text style={styles.statNumber}>{eventi.length}</Text>
             <Text style={styles.statLabel}>Eventi</Text>
           </View>
+          <View style={styles.statDivider} />
           <View style={styles.statBox}>
-            <Text style={styles.statNumber}>15+</Text>
+            <Text style={styles.statNumber}>{localiUnici}+</Text>
             <Text style={styles.statLabel}>Locali</Text>
           </View>
+          <View style={styles.statDivider} />
           <View style={styles.statBox}>
             <Text style={styles.statNumber}>24/7</Text>
             <Text style={styles.statLabel}>Prenotazioni</Text>
@@ -155,44 +181,45 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   greeting: {
-    color: colors.textSecondary,
+    color: colors.onSurfaceVariant,
     fontSize: fontSize.md,
   },
-  logoGradient: {
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.xs,
-    borderRadius: 8,
-    marginVertical: spacing.xs,
-  },
   logo: {
-    color: colors.text,
+    color: colors.primary,
     fontSize: fontSize.title,
     fontWeight: fontWeight.bold,
+    marginVertical: spacing.xs,
   },
   subtitle: {
-    color: colors.textSecondary,
-    fontSize: fontSize.sm,
-    marginTop: spacing.xs,
+    color: colors.onSurfaceVariant,
+    fontSize: fontSize.md,
   },
   section: {
     marginBottom: spacing.lg,
   },
   sectionTitle: {
-    color: colors.text,
-    fontSize: fontSize.lg,
+    color: colors.onSurface,
+    fontSize: fontSize.xl,
     fontWeight: fontWeight.semibold,
     marginBottom: spacing.md,
   },
   statsContainer: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    backgroundColor: colors.backgroundCard,
-    borderRadius: 16,
+    alignItems: 'center',
+    backgroundColor: colors.surfaceContainerLow,
+    borderRadius: borderRadius.lg,
     padding: spacing.lg,
     marginTop: spacing.md,
   },
   statBox: {
     alignItems: 'center',
+    flex: 1,
+  },
+  statDivider: {
+    width: 1,
+    height: 40,
+    backgroundColor: colors.outlineVariant,
   },
   statNumber: {
     color: colors.primary,
@@ -200,7 +227,7 @@ const styles = StyleSheet.create({
     fontWeight: fontWeight.bold,
   },
   statLabel: {
-    color: colors.textSecondary,
+    color: colors.onSurfaceVariant,
     fontSize: fontSize.sm,
     marginTop: spacing.xs,
   },

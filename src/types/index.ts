@@ -1,37 +1,35 @@
 // Tipi per l'app Discoteche Roma
 
+// Struttura dell'API PartySpot
+export interface EventoAPI {
+  ID: number;
+  post_title: string;
+  featured_image: string | false;
+  'giorno-della-settimana'?: Array<{ slug: string }>;
+  'genere-musicale-evento'?: Array<{ name: string }>;
+  'eta-minima'?: string;
+  'costi-liste-evento'?: string;
+  'costi-tavoli-evento'?: string;
+  'costi-pacchetti-evento'?: string;
+  'stato-evento-ricorrente'?: Array<{ slug: string }>;
+  'costi-formule-a-partire-da'?: string;
+  'note-evento'?: string;
+}
+
+// Struttura normalizzata per l'app
 export interface Evento {
   id: number;
-  title: {
-    rendered: string;
-  };
-  content: {
-    rendered: string;
-  };
-  excerpt: {
-    rendered: string;
-  };
-  date: string;
-  featured_media: number;
-  featured_image_url?: string;
-  acf?: {
-    data_evento?: string;
-    ora_inizio?: string;
-    ora_fine?: string;
-    prezzo?: string;
-    prezzo_prevendita?: string;
-    location?: string;
-    indirizzo?: string;
-    dress_code?: string;
-    eta_minima?: string;
-    artisti?: string;
-    genere_musicale?: string;
-  };
-  _embedded?: {
-    'wp:featuredmedia'?: Array<{
-      source_url: string;
-    }>;
-  };
+  titolo: string;
+  immagine: string | null;
+  giorno: string;
+  generiMusicali: string[];
+  etaMinima: string | null;
+  costiListe: string | null;
+  costiTavoli: string | null;
+  costiPacchetti: string | null;
+  prezzoMinimo: string | null;
+  stato: string[];
+  note: string | null;
 }
 
 export interface Prenotazione {

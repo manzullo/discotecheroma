@@ -7,13 +7,12 @@ import {
   ViewStyle,
   TextStyle,
 } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
 import { colors, spacing, borderRadius, fontSize, fontWeight } from '../theme';
 
 interface ButtonProps {
   title: string;
   onPress: () => void;
-  variant?: 'primary' | 'secondary' | 'outline';
+  variant?: 'filled' | 'tonal' | 'outlined' | 'text';
   size?: 'small' | 'medium' | 'large';
   disabled?: boolean;
   loading?: boolean;
@@ -25,7 +24,7 @@ interface ButtonProps {
 export const Button: React.FC<ButtonProps> = ({
   title,
   onPress,
-  variant = 'primary',
+  variant = 'filled',
   size = 'medium',
   disabled = false,
   loading = false,
@@ -57,74 +56,74 @@ export const Button: React.FC<ButtonProps> = ({
     }
   };
 
-  if (variant === 'primary') {
-    return (
-      <TouchableOpacity
-        onPress={onPress}
-        disabled={isDisabled}
-        activeOpacity={0.8}
-        style={[styles.buttonWrapper, style]}
-      >
-        <LinearGradient
-          colors={
-            isDisabled
-              ? [colors.textMuted, colors.textMuted]
-              : [colors.primary, colors.accent]
-          }
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 0 }}
-          style={[
+  const getVariantStyles = () => {
+    switch (variant) {
+      case 'filled':
+        return {
+          button: [
             styles.button,
-            { height: getButtonHeight() },
-          ]}
-        >
-          {loading ? (
-            <ActivityIndicator color={colors.text} />
-          ) : (
-            <>
-              {icon}
-              <Text
-                style={[
-                  styles.buttonText,
-                  { fontSize: getTextSize() },
-                  textStyle,
-                ]}
-              >
-                {title}
-              </Text>
-            </>
-          )}
-        </LinearGradient>
-      </TouchableOpacity>
-    );
-  }
+            styles.filledButton,
+            isDisabled && styles.filledButtonDisabled,
+          ],
+          text: [styles.filledText],
+          loadingColor: colors.onPrimary,
+        };
+      case 'tonal':
+        return {
+          button: [
+            styles.button,
+            styles.tonalButton,
+            isDisabled && styles.tonalButtonDisabled,
+          ],
+          text: [styles.tonalText],
+          loadingColor: colors.onSecondaryContainer,
+        };
+      case 'outlined':
+        return {
+          button: [
+            styles.button,
+            styles.outlinedButton,
+            isDisabled && styles.outlinedButtonDisabled,
+          ],
+          text: [styles.outlinedText, isDisabled && styles.outlinedTextDisabled],
+          loadingColor: colors.primary,
+        };
+      case 'text':
+        return {
+          button: [styles.button, styles.textButton],
+          text: [styles.textButtonText, isDisabled && styles.textButtonTextDisabled],
+          loadingColor: colors.primary,
+        };
+      default:
+        return {
+          button: [styles.button, styles.filledButton],
+          text: [styles.filledText],
+          loadingColor: colors.onPrimary,
+        };
+    }
+  };
+
+  const variantStyles = getVariantStyles();
 
   return (
     <TouchableOpacity
       onPress={onPress}
       disabled={isDisabled}
-      activeOpacity={0.8}
+      activeOpacity={0.7}
       style={[
-        styles.button,
-        variant === 'secondary' && styles.secondaryButton,
-        variant === 'outline' && styles.outlineButton,
+        ...variantStyles.button,
         { height: getButtonHeight() },
-        isDisabled && styles.disabledButton,
         style,
       ]}
     >
       {loading ? (
-        <ActivityIndicator
-          color={variant === 'outline' ? colors.primary : colors.text}
-        />
+        <ActivityIndicator color={variantStyles.loadingColor} />
       ) : (
         <>
           {icon}
           <Text
             style={[
-              styles.buttonText,
-              variant === 'secondary' && styles.secondaryText,
-              variant === 'outline' && styles.outlineText,
+              ...variantStyles.text,
               { fontSize: getTextSize() },
               textStyle,
             ]}
@@ -138,39 +137,63 @@ export const Button: React.FC<ButtonProps> = ({
 };
 
 const styles = StyleSheet.create({
-  buttonWrapper: {
-    borderRadius: borderRadius.md,
-    overflow: 'hidden',
-  },
   button: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: spacing.lg,
-    borderRadius: borderRadius.md,
+    borderRadius: borderRadius.xl,
     gap: spacing.sm,
   },
-  buttonText: {
-    color: colors.text,
+  // Filled button (primary)
+  filledButton: {
+    backgroundColor: colors.primary,
+  },
+  filledButtonDisabled: {
+    backgroundColor: colors.surfaceContainerHighest,
+  },
+  filledText: {
+    color: colors.onPrimary,
     fontWeight: fontWeight.semibold,
   },
-  secondaryButton: {
-    backgroundColor: colors.backgroundCard,
+  // Tonal button (secondary container)
+  tonalButton: {
+    backgroundColor: colors.secondaryContainer,
   },
-  secondaryText: {
-    color: colors.text,
+  tonalButtonDisabled: {
+    backgroundColor: colors.surfaceContainerHighest,
   },
-  outlineButton: {
+  tonalText: {
+    color: colors.onSecondaryContainer,
+    fontWeight: fontWeight.semibold,
+  },
+  // Outlined button
+  outlinedButton: {
     backgroundColor: 'transparent',
-    borderWidth: 2,
-    borderColor: colors.primary,
+    borderWidth: 1,
+    borderColor: colors.outline,
   },
-  outlineText: {
+  outlinedButtonDisabled: {
+    borderColor: colors.surfaceContainerHighest,
+  },
+  outlinedText: {
     color: colors.primary,
+    fontWeight: fontWeight.semibold,
   },
-  disabledButton: {
-    backgroundColor: colors.textMuted,
-    borderColor: colors.textMuted,
+  outlinedTextDisabled: {
+    color: colors.onSurfaceVariant,
+  },
+  // Text button
+  textButton: {
+    backgroundColor: 'transparent',
+    paddingHorizontal: spacing.md,
+  },
+  textButtonText: {
+    color: colors.primary,
+    fontWeight: fontWeight.semibold,
+  },
+  textButtonTextDisabled: {
+    color: colors.onSurfaceVariant,
   },
 });
 

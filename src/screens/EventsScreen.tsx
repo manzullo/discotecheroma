@@ -6,31 +6,34 @@ import {
   FlatList,
   RefreshControl,
   StatusBar,
+  TouchableOpacity,
+  ScrollView,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { EventCard, LoadingSpinner } from '../components';
 import { fetchEventi } from '../services/api';
 import { Evento, RootStackParamList } from '../types';
-import { colors, spacing, fontSize, fontWeight } from '../theme';
+import { colors, spacing, fontSize, fontWeight, borderRadius } from '../theme';
 
 type EventsScreenProps = {
   navigation: NativeStackNavigationProp<RootStackParamList>;
 };
 
+const GIORNI = ['Tutti', 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato', 'Domenica'];
+
 export const EventsScreen: React.FC<EventsScreenProps> = ({ navigation }) => {
   const [eventi, setEventi] = useState<Evento[]>([]);
+  const [filteredEventi, setFilteredEventi] = useState<Evento[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [selectedDay, setSelectedDay] = useState('Tutti');
 
   const loadEventi = async () => {
     try {
       const data = await fetchEventi();
-      // Ordina per data
-      const sorted = data.sort(
-        (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
-      );
-      setEventi(sorted);
+      setEventi(data);
+      filterByDay(data, selectedDay);
     } catch (error) {
       console.error('Errore caricamento eventi:', error);
     } finally {
@@ -39,9 +42,21 @@ export const EventsScreen: React.FC<EventsScreenProps> = ({ navigation }) => {
     }
   };
 
+  const filterByDay = (eventiList: Evento[], day: string) => {
+    if (day === 'Tutti') {
+      setFilteredEventi(eventiList);
+    } else {
+      setFilteredEventi(eventiList.filter(e => e.giorno === day));
+    }
+  };
+
   useEffect(() => {
     loadEventi();
   }, []);
+
+  useEffect(() => {
+    filterByDay(eventi, selectedDay);
+  }, [selectedDay, eventi]);
 
   const onRefresh = () => {
     setRefreshing(true);
@@ -58,15 +73,46 @@ export const EventsScreen: React.FC<EventsScreenProps> = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      <StatusBar barStyle="light-content" backgroundColor={colors.background} />
+      <StatusBar barStyle="dark-content" backgroundColor={colors.background} />
 
       <View style={styles.header}>
-        <Text style={styles.title}>Tutti gli Eventi</Text>
-        <Text style={styles.subtitle}>{eventi.length} eventi disponibili</Text>
+        <Text style={styles.title}>Eventi</Text>
+        <Text style={styles.subtitle}>{filteredEventi.length} eventi disponibili</Text>
       </View>
 
+      {/* Day Filter - M3 Filter Chips */}
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        style={styles.filterContainer}
+        contentContainerStyle={styles.filterContent}
+      >
+        {GIORNI.map((giorno) => {
+          const isSelected = selectedDay === giorno;
+          return (
+            <TouchableOpacity
+              key={giorno}
+              style={[
+                styles.filterChip,
+                isSelected && styles.filterChipSelected,
+              ]}
+              onPress={() => setSelectedDay(giorno)}
+            >
+              <Text
+                style={[
+                  styles.filterText,
+                  isSelected && styles.filterTextSelected,
+                ]}
+              >
+                {giorno}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
+      </ScrollView>
+
       <FlatList
-        data={eventi}
+        data={filteredEventi}
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
           <EventCard
@@ -87,10 +133,10 @@ export const EventsScreen: React.FC<EventsScreenProps> = ({ navigation }) => {
         }
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
-            <Text style={styles.emptyIcon}>🎉</Text>
-            <Text style={styles.emptyText}>Nessun evento disponibile</Text>
+            <Text style={styles.emptyIcon}>📅</Text>
+            <Text style={styles.emptyText}>Nessun evento per {selectedDay}</Text>
             <Text style={styles.emptySubtext}>
-              Torna più tardi per scoprire nuovi eventi!
+              Prova a selezionare un altro giorno
             </Text>
           </View>
         }
@@ -106,17 +152,48 @@ const styles = StyleSheet.create({
   },
   header: {
     paddingHorizontal: spacing.md,
-    paddingVertical: spacing.lg,
+    paddingTop: spacing.lg,
+    paddingBottom: spacing.sm,
   },
   title: {
-    color: colors.text,
+    color: colors.onSurface,
     fontSize: fontSize.xxl,
     fontWeight: fontWeight.bold,
   },
   subtitle: {
-    color: colors.textSecondary,
-    fontSize: fontSize.sm,
+    color: colors.onSurfaceVariant,
+    fontSize: fontSize.md,
     marginTop: spacing.xs,
+  },
+  filterContainer: {
+    maxHeight: 48,
+    marginBottom: spacing.md,
+  },
+  filterContent: {
+    paddingHorizontal: spacing.md,
+    gap: spacing.sm,
+  },
+  filterChip: {
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    borderRadius: borderRadius.sm,
+    backgroundColor: colors.surfaceContainerHigh,
+    marginRight: spacing.sm,
+    borderWidth: 1,
+    borderColor: colors.outline,
+  },
+  filterChipSelected: {
+    backgroundColor: colors.secondaryContainer,
+    borderColor: colors.secondary,
+  },
+  filterText: {
+    color: colors.onSurfaceVariant,
+    fontSize: fontSize.md,
+    fontWeight: fontWeight.medium,
+  },
+  filterTextSelected: {
+    color: colors.onSecondaryContainer,
+    fontWeight: fontWeight.semibold,
   },
   listContent: {
     paddingHorizontal: spacing.md,
@@ -131,12 +208,12 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
   },
   emptyText: {
-    color: colors.text,
+    color: colors.onSurface,
     fontSize: fontSize.lg,
     fontWeight: fontWeight.semibold,
   },
   emptySubtext: {
-    color: colors.textSecondary,
+    color: colors.onSurfaceVariant,
     fontSize: fontSize.md,
     marginTop: spacing.xs,
   },

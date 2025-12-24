@@ -4,40 +4,31 @@ import {
   Text,
   StyleSheet,
   ScrollView,
-  ImageBackground,
+  Image,
   Dimensions,
   StatusBar,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { LinearGradient } from 'expo-linear-gradient';
 import { Button } from '../components';
 import { RootStackParamList } from '../types';
-import { colors, spacing, borderRadius, fontSize, fontWeight } from '../theme';
+import { colors, spacing, borderRadius, fontSize, fontWeight, elevation } from '../theme';
 
 type EventDetailScreenProps = NativeStackScreenProps<
   RootStackParamList,
   'EventDetail'
 >;
 
-const { width, height } = Dimensions.get('window');
+const { width } = Dimensions.get('window');
+
+// Immagine placeholder
+const PLACEHOLDER_IMAGE = 'https://images.unsplash.com/photo-1571266028243-e4733b0f0bb0?w=800';
 
 export const EventDetailScreen: React.FC<EventDetailScreenProps> = ({
   route,
   navigation,
 }) => {
   const { evento } = route.params;
-  const acf = evento.acf || {};
-
-  const stripHtml = (html: string) => {
-    return html
-      .replace(/<[^>]*>/g, '')
-      .replace(/&nbsp;/g, ' ')
-      .replace(/&amp;/g, '&')
-      .replace(/&lt;/g, '<')
-      .replace(/&gt;/g, '>')
-      .trim();
-  };
 
   const handleBooking = () => {
     navigation.navigate('Booking', { evento });
@@ -50,7 +41,7 @@ export const EventDetailScreen: React.FC<EventDetailScreenProps> = ({
   }: {
     icon: string;
     label: string;
-    value?: string;
+    value?: string | null;
   }) => {
     if (!value) return null;
     return (
@@ -64,103 +55,91 @@ export const EventDetailScreen: React.FC<EventDetailScreenProps> = ({
     );
   };
 
+  const imageUrl = evento.immagine || PLACEHOLDER_IMAGE;
+
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="light-content" translucent backgroundColor="transparent" />
+      <StatusBar barStyle="dark-content" backgroundColor={colors.background} />
 
       <ScrollView
         style={styles.scrollView}
         showsVerticalScrollIndicator={false}
-        bounces={false}
       >
         {/* Hero Image */}
-        <ImageBackground
-          source={{ uri: evento.featured_image_url }}
-          style={styles.heroImage}
-        >
-          <LinearGradient
-            colors={['transparent', colors.background]}
-            style={styles.heroGradient}
-          >
-            <SafeAreaView edges={['top']}>
-              <View style={styles.heroContent}>
-                {acf.prezzo_prevendita && (
-                  <View style={styles.priceTag}>
-                    <Text style={styles.priceLabel}>Prevendita</Text>
-                    <Text style={styles.priceValue}>{acf.prezzo_prevendita}</Text>
-                  </View>
-                )}
-              </View>
-            </SafeAreaView>
-          </LinearGradient>
-        </ImageBackground>
+        <View style={styles.heroContainer}>
+          <Image
+            source={{ uri: imageUrl }}
+            style={styles.heroImage}
+            resizeMode="cover"
+          />
+          {evento.prezzoMinimo && (
+            <View style={styles.priceTag}>
+              <Text style={styles.priceLabel}>A partire da</Text>
+              <Text style={styles.priceValue}>{evento.prezzoMinimo}€</Text>
+            </View>
+          )}
+        </View>
 
         {/* Content */}
         <View style={styles.content}>
           {/* Title */}
-          <Text style={styles.title}>{stripHtml(evento.title.rendered)}</Text>
+          <Text style={styles.title}>{evento.titolo}</Text>
 
-          {/* Location */}
-          {acf.location && (
-            <View style={styles.locationRow}>
-              <Text style={styles.locationIcon}>📍</Text>
-              <Text style={styles.location}>{acf.location}</Text>
-            </View>
-          )}
+          {/* Day Chip */}
+          <View style={styles.dayChip}>
+            <Text style={styles.dayIcon}>📅</Text>
+            <Text style={styles.dayText}>{evento.giorno}</Text>
+          </View>
 
           {/* Tags */}
-          {acf.genere_musicale && (
+          {evento.generiMusicali.length > 0 && (
             <View style={styles.tagsContainer}>
-              {acf.genere_musicale.split(',').map((tag, index) => (
+              {evento.generiMusicali.map((tag, index) => (
                 <View key={index} style={styles.tag}>
-                  <Text style={styles.tagText}>{tag.trim()}</Text>
+                  <Text style={styles.tagText}>{tag}</Text>
                 </View>
               ))}
             </View>
           )}
 
           {/* Info Cards */}
-          <View style={styles.infoCard}>
+          <View style={[styles.infoCard, elevation.level1]}>
             <Text style={styles.sectionTitle}>Dettagli Evento</Text>
-            <InfoRow icon="📅" label="Data" value={acf.data_evento} />
-            <InfoRow
-              icon="🕐"
-              label="Orario"
-              value={
-                acf.ora_inizio && acf.ora_fine
-                  ? `${acf.ora_inizio} - ${acf.ora_fine}`
-                  : acf.ora_inizio
-              }
-            />
-            <InfoRow icon="💰" label="Ingresso" value={acf.prezzo} />
-            <InfoRow icon="🎫" label="Prevendita" value={acf.prezzo_prevendita} />
-            <InfoRow icon="👔" label="Dress Code" value={acf.dress_code} />
-            <InfoRow icon="🔞" label="Età Minima" value={acf.eta_minima ? `${acf.eta_minima}+` : undefined} />
+            <InfoRow icon="📅" label="Giorno" value={evento.giorno} />
+            <InfoRow icon="🔞" label="Età Minima" value={evento.etaMinima ? `${evento.etaMinima}+` : null} />
           </View>
 
-          {/* Location Card */}
-          {acf.indirizzo && (
-            <View style={styles.infoCard}>
-              <Text style={styles.sectionTitle}>Dove</Text>
-              <InfoRow icon="📍" label="Indirizzo" value={acf.indirizzo} />
+          {/* Costi Liste */}
+          {evento.costiListe && (
+            <View style={[styles.infoCard, elevation.level1]}>
+              <Text style={styles.sectionTitle}>📋 Liste</Text>
+              <Text style={styles.costiText}>{evento.costiListe}</Text>
             </View>
           )}
 
-          {/* Artists */}
-          {acf.artisti && (
-            <View style={styles.infoCard}>
-              <Text style={styles.sectionTitle}>🎧 Line-up</Text>
-              <Text style={styles.artists}>{acf.artisti}</Text>
+          {/* Costi Tavoli */}
+          {evento.costiTavoli && (
+            <View style={[styles.infoCard, elevation.level1]}>
+              <Text style={styles.sectionTitle}>🪑 Tavoli</Text>
+              <Text style={styles.costiText}>{evento.costiTavoli}</Text>
             </View>
           )}
 
-          {/* Description */}
-          <View style={styles.infoCard}>
-            <Text style={styles.sectionTitle}>Info</Text>
-            <Text style={styles.description}>
-              {stripHtml(evento.content.rendered)}
-            </Text>
-          </View>
+          {/* Costi Pacchetti */}
+          {evento.costiPacchetti && (
+            <View style={[styles.infoCard, elevation.level1]}>
+              <Text style={styles.sectionTitle}>🎁 Pacchetti</Text>
+              <Text style={styles.costiText}>{evento.costiPacchetti}</Text>
+            </View>
+          )}
+
+          {/* Note */}
+          {evento.note && (
+            <View style={[styles.infoCard, elevation.level1]}>
+              <Text style={styles.sectionTitle}>📝 Note</Text>
+              <Text style={styles.costiText}>{evento.note}</Text>
+            </View>
+          )}
 
           {/* Spacing for button */}
           <View style={{ height: 100 }} />
@@ -169,23 +148,20 @@ export const EventDetailScreen: React.FC<EventDetailScreenProps> = ({
 
       {/* Fixed Booking Button */}
       <SafeAreaView edges={['bottom']} style={styles.bookingBar}>
-        <LinearGradient
-          colors={[colors.background, colors.backgroundLight]}
-          style={styles.bookingGradient}
-        >
-          <View style={styles.bookingContainer}>
-            <View style={styles.bookingInfo}>
-              <Text style={styles.bookingPrice}>{acf.prezzo_prevendita || acf.prezzo || 'Gratis'}</Text>
-              <Text style={styles.bookingLabel}>Prevendita</Text>
-            </View>
-            <Button
-              title="Prenota Ora"
-              onPress={handleBooking}
-              size="large"
-              style={styles.bookingButton}
-            />
+        <View style={styles.bookingContainer}>
+          <View style={styles.bookingInfo}>
+            <Text style={styles.bookingPrice}>
+              {evento.prezzoMinimo ? `da ${evento.prezzoMinimo}€` : 'Info'}
+            </Text>
+            <Text style={styles.bookingLabel}>Prenota in lista</Text>
           </View>
-        </LinearGradient>
+          <Button
+            title="Prenota Ora"
+            onPress={handleBooking}
+            size="large"
+            style={styles.bookingButton}
+          />
+        </View>
       </SafeAreaView>
     </View>
   );
@@ -199,60 +175,62 @@ const styles = StyleSheet.create({
   scrollView: {
     flex: 1,
   },
-  heroImage: {
+  heroContainer: {
     width: width,
-    height: height * 0.45,
-    backgroundColor: colors.backgroundCard,
+    height: 280,
+    backgroundColor: colors.surfaceContainerHighest,
+    position: 'relative',
   },
-  heroGradient: {
-    flex: 1,
-    justifyContent: 'space-between',
-  },
-  heroContent: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    padding: spacing.md,
+  heroImage: {
+    width: '100%',
+    height: '100%',
   },
   priceTag: {
-    alignSelf: 'flex-end',
-    backgroundColor: colors.primary,
+    position: 'absolute',
+    bottom: spacing.md,
+    right: spacing.md,
+    backgroundColor: colors.primaryContainer,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
     borderRadius: borderRadius.md,
     alignItems: 'center',
   },
   priceLabel: {
-    color: colors.text,
+    color: colors.onPrimaryContainer,
     fontSize: fontSize.xs,
-    opacity: 0.8,
   },
   priceValue: {
-    color: colors.text,
+    color: colors.onPrimaryContainer,
     fontSize: fontSize.xl,
     fontWeight: fontWeight.bold,
   },
   content: {
     padding: spacing.md,
-    marginTop: -spacing.lg,
   },
   title: {
-    color: colors.text,
-    fontSize: fontSize.title,
+    color: colors.onSurface,
+    fontSize: fontSize.xxl,
     fontWeight: fontWeight.bold,
-    lineHeight: 40,
+    lineHeight: 36,
   },
-  locationRow: {
+  dayChip: {
     flexDirection: 'row',
     alignItems: 'center',
     marginTop: spacing.sm,
     gap: spacing.xs,
+    backgroundColor: colors.secondaryContainer,
+    alignSelf: 'flex-start',
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
+    borderRadius: borderRadius.sm,
   },
-  locationIcon: {
+  dayIcon: {
     fontSize: fontSize.md,
   },
-  location: {
-    color: colors.textSecondary,
+  dayText: {
+    color: colors.onSecondaryContainer,
     fontSize: fontSize.md,
+    fontWeight: fontWeight.medium,
   },
   tagsContainer: {
     flexDirection: 'row',
@@ -261,25 +239,25 @@ const styles = StyleSheet.create({
     marginTop: spacing.md,
   },
   tag: {
-    backgroundColor: colors.backgroundCard,
+    backgroundColor: colors.surfaceContainerHigh,
     paddingHorizontal: spacing.sm,
     paddingVertical: spacing.xs,
-    borderRadius: borderRadius.full,
+    borderRadius: borderRadius.sm,
     borderWidth: 1,
-    borderColor: colors.primary,
+    borderColor: colors.outline,
   },
   tagText: {
-    color: colors.primaryLight,
+    color: colors.onSurfaceVariant,
     fontSize: fontSize.sm,
   },
   infoCard: {
-    backgroundColor: colors.backgroundCard,
+    backgroundColor: colors.surfaceContainerLow,
     borderRadius: borderRadius.lg,
     padding: spacing.md,
     marginTop: spacing.md,
   },
   sectionTitle: {
-    color: colors.text,
+    color: colors.onSurface,
     fontSize: fontSize.lg,
     fontWeight: fontWeight.semibold,
     marginBottom: spacing.md,
@@ -289,7 +267,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: spacing.sm,
     borderBottomWidth: 1,
-    borderBottomColor: colors.border,
+    borderBottomColor: colors.outlineVariant,
   },
   infoIcon: {
     fontSize: fontSize.lg,
@@ -299,21 +277,16 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   infoLabel: {
-    color: colors.textSecondary,
+    color: colors.onSurfaceVariant,
     fontSize: fontSize.xs,
   },
   infoValue: {
-    color: colors.text,
+    color: colors.onSurface,
     fontSize: fontSize.md,
     fontWeight: fontWeight.medium,
   },
-  artists: {
-    color: colors.text,
-    fontSize: fontSize.md,
-    lineHeight: 24,
-  },
-  description: {
-    color: colors.textSecondary,
+  costiText: {
+    color: colors.onSurface,
     fontSize: fontSize.md,
     lineHeight: 24,
   },
@@ -322,27 +295,27 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-  },
-  bookingGradient: {
-    paddingTop: spacing.md,
+    backgroundColor: colors.surface,
+    borderTopWidth: 1,
+    borderTopColor: colors.outlineVariant,
   },
   bookingContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: spacing.md,
-    paddingBottom: spacing.md,
+    paddingVertical: spacing.md,
     gap: spacing.md,
   },
   bookingInfo: {
     flex: 1,
   },
   bookingPrice: {
-    color: colors.text,
+    color: colors.onSurface,
     fontSize: fontSize.xl,
     fontWeight: fontWeight.bold,
   },
   bookingLabel: {
-    color: colors.textSecondary,
+    color: colors.onSurfaceVariant,
     fontSize: fontSize.sm,
   },
   bookingButton: {

@@ -7,7 +7,7 @@ import {
   ViewStyle,
   TextInputProps,
 } from 'react-native';
-import { colors, spacing, borderRadius, fontSize } from '../theme';
+import { colors, spacing, borderRadius, fontSize, fontWeight } from '../theme';
 
 interface InputProps extends TextInputProps {
   label?: string;
@@ -31,8 +31,9 @@ export const Input: React.FC<InputProps> = ({
           styles.input,
           isFocused && styles.inputFocused,
           error && styles.inputError,
+          props.style,
         ]}
-        placeholderTextColor={colors.textMuted}
+        placeholderTextColor={colors.onSurfaceVariant}
         onFocus={() => setIsFocused(true)}
         onBlur={() => setIsFocused(false)}
         {...props}
@@ -47,22 +48,24 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
   },
   label: {
-    color: colors.text,
+    color: colors.onSurface,
     fontSize: fontSize.sm,
+    fontWeight: fontWeight.medium,
     marginBottom: spacing.xs,
   },
   input: {
-    backgroundColor: colors.backgroundCard,
-    borderRadius: borderRadius.md,
+    backgroundColor: colors.surfaceContainerHighest,
+    borderRadius: borderRadius.sm,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm + 4,
-    color: colors.text,
-    fontSize: fontSize.md,
+    color: colors.onSurface,
+    fontSize: fontSize.lg,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: colors.outline,
   },
   inputFocused: {
     borderColor: colors.primary,
+    borderWidth: 2,
   },
   inputError: {
     borderColor: colors.error,
